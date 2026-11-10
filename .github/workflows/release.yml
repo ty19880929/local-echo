@@ -59,4 +59,4 @@ jobs:
           merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: dist/**/* # Linux 产物保留 debian/、generate-rpm/ 子目录
