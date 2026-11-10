@@ -1,0 +1,64 @@
+[package]
+name = "local-echo"
+version = "0.1.0"
+edition = "2024"
+description = "Local Echo: LAN peer-to-peer chat, file transfer and SSH file exchange"
+license = "Proprietary"
+
+[dependencies]
+gpui-kit = "=0.9.1"
+tokio = { version = "1", features = ["rt-multi-thread", "net", "io-util", "fs", "sync", "time", "macros"] }
+russh = { version = "0.65", default-features = false, features = ["ring", "rsa", "flate2"] }
+russh-sftp = "3"
+rand = "0.10"
+rusqlite = { version = "0.41", features = ["bundled"] }
+tray-icon = { version = "0.26", default-features = false, features = ["ksni"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+dirs = "6"
+local-ip-address = "0.6"
+chrono = "0.4"
+anyhow = "1"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.56"
+
+[target.'cfg(windows)'.build-dependencies]
+winresource = "0.1"
+
+[profile.dev.package."*"]
+debug = false
+
+[profile.release]
+strip = true
+
+[package.metadata.deb]
+maintainer = "Local Echo"
+section = "net"
+depends = "$auto, libvulkan1, libwayland-client0, libfontconfig1, openssh-client"
+assets = [
+  ["target/release/local-echo", "usr/bin/", "755"],
+  ["assets/local-echo.desktop", "usr/share/applications/", "644"],
+  ["assets/icons/hicolor/48x48/apps/local-echo.png", "usr/share/icons/hicolor/48x48/apps/", "644"],
+  ["assets/icons/hicolor/128x128/apps/local-echo.png", "usr/share/icons/hicolor/128x128/apps/", "644"],
+  ["assets/icons/hicolor/256x256/apps/local-echo.png", "usr/share/icons/hicolor/256x256/apps/", "644"],
+  ["assets/icons/hicolor/512x512/apps/local-echo.png", "usr/share/icons/hicolor/512x512/apps/", "644"],
+]
+
+[package.metadata.generate-rpm]
+assets = [
+  { source = "target/release/local-echo", dest = "/usr/bin/local-echo", mode = "755" },
+  { source = "assets/local-echo.desktop", dest = "/usr/share/applications/local-echo.desktop", mode = "644" },
+  { source = "assets/icons/hicolor/48x48/apps/local-echo.png", dest = "/usr/share/icons/hicolor/48x48/apps/local-echo.png", mode = "644" },
+  { source = "assets/icons/hicolor/128x128/apps/local-echo.png", dest = "/usr/share/icons/hicolor/128x128/apps/local-echo.png", mode = "644" },
+  { source = "assets/icons/hicolor/256x256/apps/local-echo.png", dest = "/usr/share/icons/hicolor/256x256/apps/local-echo.png", mode = "644" },
+  { source = "assets/icons/hicolor/512x512/apps/local-echo.png", dest = "/usr/share/icons/hicolor/512x512/apps/local-echo.png", mode = "644" },
+]
+
+[package.metadata.generate-rpm.requires]
+openssh-clients = "*"
+vulkan-loader = "*"
+libwayland-client = "*"
+fontconfig = "*"

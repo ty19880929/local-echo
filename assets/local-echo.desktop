@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Local Echo
+Comment=LAN peer-to-peer chat, file transfer and SSH file exchange
+Exec=local-echo
+Icon=local-echo
+Terminal=false
+Categories=Network;FileTransfer;
+StartupWMClass=local-echo
