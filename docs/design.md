@@ -656,7 +656,9 @@ OutputDir=..\..\target\installer
 OutputBaseFilename=local-echo-{#AppVersion}-windows-x86_64-setup
 
 [Languages]
-Name: "chs"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+; ChineseSimplified.isl 取自 jrsoftware/issrc 标签 is-6_7_1（Files/Languages/Unofficial），
+; windows-latest 预装的 Inno Setup 6.7.1 不自带简体中文。
+Name: "chs"; MessagesFile: "ChineseSimplified.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "创建桌面快捷方式"
@@ -766,7 +768,7 @@ jobs:
 | 14 | cargo-deb | ✅ 能自动推导依赖；在 26.04 上构建会要求 `libc6 >= 2.43`，说明必须在 22.04 上构建 |
 | 15 | cargo-generate-rpm | ✅ 能自动推导依赖，手动列出的依赖也生效 |
 | 16 | `.desktop` 与开机自启的 `.desktop` | ✅ 都通过 `desktop-file-validate` |
-| 17 | Inno Setup | ✅ `windows-latest` 预装 6.7.1，官方带 `ChineseSimplified.isl`（只查了资料）；`[Registry]` 段的 `uninsdeletevalue` 不适用于「运行时才创建的值」，所以改用 `reg delete`（依据官方文档） |
+| 17 | Inno Setup | ✅ `windows-latest` 预装 6.7.1，但**不带** `ChineseSimplified.isl`（首次 CI 构建失败才发现；6.7.1 时它还在 Unofficial 目录），改为把该版本的语言文件放进 `packaging/windows/`；`[Registry]` 段的 `uninsdeletevalue` 不适用于「运行时才创建的值」，所以改用 `reg delete`（依据官方文档） |
 | 18 | chrono 是否已在依赖树中 | ✅ `chrono 0.4.45`（含 `clock` 特性）已由 gpui-base 引入 |
 | 19 | 第一版实现端到端走查（2026-11-10，两个实例分处不同网络命名空间，运行在隔离的 Xvfb 显示上） | ✅ 添加 / 编辑联系人、被动建立联系人、双向文本、粘贴图片（两端各自按时间戳命名）、附件发送文件（内容一致）、同名文件确认（联系人与服务器两种）、设备不匹配拒收与重试、添加服务器（错误密码 / 四步进度）、上传 / 下载、更改远程目录、在终端中打开（xterm）、重新授权、关窗驻留与单实例唤起、关窗期间的未读计数、开机自启开关、跨文件系统的数据迁移与自动重启、删除服务器（保留文件） |
 | 20 | 按 Claude Design 交付稿（docs/ui）实现界面（2026-11-10） | ✅ 浅色 / 深色主题、侧边栏（多 IP 网卡名、空分组引导、52 px 双行条目、方形未读徽标）、消息分组与日期分隔、气泡 / 发送状态 / 设备不匹配提示、图片等比尺寸、文件卡片（中间省略、进度、操作行、失败重试）、服务器页与密钥失效横幅、各对话框（步骤进度、只读字段、浏览器表格、同名列表、删除 / 迁移确认）、设置页均在隔离 Xvfb 中截图核对。交付主题 JSON 中 7 个键名与 gpui-kit 0.9.1 不一致（如 `link.foreground` 应为 `link`）已更正，并补充实心危险按钮配色 |

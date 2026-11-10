@@ -21,7 +21,9 @@ OutputDir=..\..\target\installer
 OutputBaseFilename=local-echo-{#AppVersion}-windows-x86_64-setup
 
 [Languages]
-Name: "chs"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+; ChineseSimplified.isl 取自 jrsoftware/issrc 标签 is-6_7_1（Files/Languages/Unofficial），
+; windows-latest 预装的 Inno Setup 6.7.1 不自带简体中文。
+Name: "chs"; MessagesFile: "ChineseSimplified.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "创建桌面快捷方式"
