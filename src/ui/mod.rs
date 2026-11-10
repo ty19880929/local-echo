@@ -3,6 +3,7 @@
 mod app;
 mod chat;
 mod dialogs;
+mod kit;
 mod settings;
 
 use std::{
@@ -11,7 +12,7 @@ use std::{
 };
 
 use gpui_kit::{
-    component::{TitleBar, WindowExt as _, notification::Notification},
+    component::{Theme, ThemeRegistry, TitleBar, WindowExt as _},
     *,
 };
 use tokio::sync::mpsc::UnboundedReceiver;
@@ -29,6 +30,8 @@ pub struct AppState {
     pub core: Arc<Core>,
     pub unread: HashMap<i64, u32>,
     pub progress: HashMap<String, u64>,
+    /// 失败消息的原因（只存内存），用于行内显示「发送失败」与「设备不匹配」。
+    pub errors: HashMap<String, String>,
     pub auth_failed: HashSet<i64>,
     pub selected: Option<i64>,
     window: Option<AnyWindowHandle>,
@@ -46,11 +49,30 @@ pub fn core(cx: &App) -> Arc<Core> {
     state(cx).core.clone()
 }
 
+/// 载入品牌主题（assets/theme.json：Local Echo Light / Dark），按系统明暗应用。
+pub fn apply_brand_theme(cx: &mut App) {
+    let registry = ThemeRegistry::global_mut(cx);
+    if let Err(e) = registry.load_themes_from_str(include_str!("../../assets/theme.json")) {
+        eprintln!("主题载入失败：{e:#}");
+        return;
+    }
+    let light = registry.themes().get("Local Echo Light").cloned();
+    let dark = registry.themes().get("Local Echo Dark").cloned();
+    if let (Some(light), Some(dark)) = (light, dark) {
+        Theme::update(cx, |theme| {
+            theme.apply_config(&dark);
+            theme.apply_config(&light);
+        });
+    }
+    Theme::sync_system_appearance(None, cx);
+}
+
 pub fn init(core: Arc<Core>, tray: Option<Tray>, mut rx: UnboundedReceiver<Event>, cx: &mut App) {
     cx.set_global(AppState {
         core,
         unread: HashMap::new(),
         progress: HashMap::new(),
+        errors: HashMap::new(),
         auth_failed: HashSet::new(),
         selected: None,
         window: None,
@@ -90,11 +112,28 @@ fn handle_event(event: Event, cx: &mut App) {
             update_view(cx, |view, _, cx| view.refresh_chat(cx));
         }
         Event::Status { id, status, error } => {
-            cx.global_mut::<AppState>().progress.remove(&id);
+            // 失败原因在消息行内显示（设计 03-A / 03-E / 04-B），不弹 Toast。
+            let app = cx.global_mut::<AppState>();
+            app.progress.remove(&id);
+            match error {
+                Some(error) => app.errors.insert(id.clone(), error),
+                None => app.errors.remove(&id),
+            };
+            // 收到的文件保存完成时提示（设计 03-C「文件已保存」）。
+            let saved = status == crate::db::Status::Ok
+                && state(cx)
+                    .core
+                    .db(|db| db.message(&id))
+                    .ok()
+                    .flatten()
+                    .is_some_and(|m| !m.outgoing && m.kind == crate::db::MsgKind::File);
             update_view(cx, |view, window, cx| {
                 view.on_status(&id, status, cx);
-                if let Some(error) = error {
-                    window.push_notification(Notification::error(error), cx);
+                if saved {
+                    window.push_notification(
+                        gpui_kit::component::notification::Notification::success("文件已保存"),
+                        cx,
+                    );
                 }
             });
         }
@@ -177,32 +216,65 @@ fn window_closed(cx: &mut App) {
     state.view = None;
 }
 
-/// 启动失败时显示错误并退出。
+/// 启动失败时显示错误并退出（设计 11-B：「无法启动 Local Echo」，420 宽）。
 pub fn fatal(message: String, cx: &mut App) {
     struct Fatal(SharedString);
     impl Render for Fatal {
         fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-            use gpui_kit::component::{
-                ActiveTheme as _,
-                button::{Button, ButtonVariants as _},
-                v_flex,
+            use gpui_kit::{
+                assets::IconName as Ic,
+                component::{
+                    ActiveTheme as _, StyledExt as _,
+                    button::{Button, ButtonVariants as _},
+                    h_flex, v_flex,
+                },
             };
             v_flex()
                 .size_full()
-                .p_6()
-                .gap_4()
-                .justify_center()
-                .bg(cx.theme().background)
+                .bg(cx.theme().popover)
                 .text_color(cx.theme().foreground)
-                .child(self.0.clone())
                 .child(
-                    Button::new("quit")
-                        .primary()
-                        .label("确定")
-                        .on_click(|_, _, cx| cx.quit()),
+                    h_flex()
+                        .px_6()
+                        .pt(px(20.))
+                        .items_start()
+                        .gap_3()
+                        .child(
+                            div()
+                                .mt(px(1.))
+                                .text_color(cx.theme().danger)
+                                .child(kit::icon(Ic::TriangleAlert, 20.)),
+                        )
+                        .child(
+                            div()
+                                .text_size(px(16.))
+                                .line_height(px(22.))
+                                .font_semibold()
+                                .child("无法启动 Local Echo"),
+                        ),
+                )
+                .child(
+                    div()
+                        .px_6()
+                        .pt_3()
+                        .pb_4()
+                        .flex_1()
+                        .text_size(px(14.))
+                        .line_height(px(22.))
+                        .text_color(cx.theme().muted_foreground)
+                        .child(self.0.clone()),
+                )
+                .child(
+                    kit::dialog_footer().child(
+                        Button::new("quit")
+                            .primary()
+                            .label("退出")
+                            .on_click(|_, _, cx| cx.quit()),
+                    ),
                 )
         }
     }
+    apply_brand_theme(cx);
     let options = WindowOptions {
         app_id: Some("local-echo".into()),
         window_bounds: Some(WindowBounds::Windowed(Bounds::centered(
@@ -220,19 +292,14 @@ pub fn fatal(message: String, cx: &mut App) {
 
 // ---------------------------------------------------------------- 格式化
 
-pub fn format_time(ts: i64) -> String {
-    use chrono::{Datelike as _, Local, TimeZone as _};
-    let Some(time) = Local.timestamp_millis_opt(ts).single() else {
-        return String::new();
-    };
-    let now = Local::now();
-    if time.date_naive() == now.date_naive() {
-        time.format("%H:%M").to_string()
-    } else if time.year() == now.year() {
-        time.format("%m-%d %H:%M").to_string()
-    } else {
-        time.format("%Y-%m-%d %H:%M").to_string()
-    }
+/// 消息表头时间：HH:MM（日期由分隔线给出）。
+pub fn format_clock(ts: i64) -> String {
+    use chrono::{Local, TimeZone as _};
+    Local
+        .timestamp_millis_opt(ts)
+        .single()
+        .map(|t| t.format("%H:%M").to_string())
+        .unwrap_or_default()
 }
 
 pub fn format_full_time(ts: i64) -> String {

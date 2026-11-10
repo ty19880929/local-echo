@@ -1,17 +1,15 @@
-//! 主窗口：标题栏 + 侧边栏 + 会话区（设计 9）。
+//! 主窗口：标题栏 + 侧边栏 + 会话区（设计 01 / 02，docs/ui「LE Window」）。
 
-use std::sync::Arc;
+use std::time::Duration;
 
 use gpui_kit::{
+    assets::IconName as Ic,
     component::{
-        ActiveTheme as _, Icon, IconName, Selectable as _, TitleBar, WindowExt as _,
-        button::{Button, ButtonVariant, ButtonVariants as _},
+        ActiveTheme as _, StyledExt as _, Theme, TitleBar, WindowExt as _,
+        button::{Button, ButtonVariants as _},
         h_flex,
-        menu::PopupMenuItem,
+        menu::{ContextMenuExt as _, PopupMenuItem},
         notification::Notification,
-        sidebar::{
-            Sidebar, SidebarFooter, SidebarGroup, SidebarHeader, SidebarMenu, SidebarMenuItem,
-        },
         v_flex,
     },
     prelude::FluentBuilder as _,
@@ -19,7 +17,7 @@ use gpui_kit::{
 };
 
 use super::{
-    AppState, chat::ChatView, core, dialogs, refresh_tray, settings::SettingsView, state,
+    AppState, chat::ChatView, core, dialogs, kit, refresh_tray, settings::SettingsView, state,
     window_closed,
 };
 use crate::db::{Contact, ContactKind, Message, Status};
@@ -32,33 +30,35 @@ enum Page {
 
 pub struct AppView {
     contacts: Vec<Contact>,
-    ips: Vec<String>,
+    /// (网卡名, IP)
+    ips: Vec<(String, String)>,
+    /// 刚复制的 IP，2 秒内显示对勾。
+    copied: Option<String>,
     page: Page,
-}
-
-pub fn logo() -> Arc<Image> {
-    Arc::new(Image::from_bytes(
-        ImageFormat::Png,
-        include_bytes!("../../assets/tray.png").to_vec(),
-    ))
+    _appearance: Subscription,
 }
 
 impl AppView {
     pub fn new(window: &mut Window, cx: &mut Context<Self>) -> Self {
         cx.on_release(|_, cx| window_closed(cx)).detach();
+        // 跟随系统明暗切换浅色 / 深色主题。
+        let appearance = cx.observe_window_appearance(window, |_, window, cx| {
+            Theme::sync_system_appearance(Some(window), cx);
+        });
         let ips = local_ip_address::list_afinet_netifas()
             .unwrap_or_default()
             .into_iter()
             .filter(|(_, ip)| ip.is_ipv4() && !ip.is_loopback())
-            .map(|(_, ip)| ip.to_string())
+            .map(|(name, ip)| (name, ip.to_string()))
             .collect();
         let mut this = Self {
             contacts: Vec::new(),
             ips,
+            copied: None,
             page: Page::Empty,
+            _appearance: appearance,
         };
         this.reload_contacts(cx);
-        // 窗口重建时恢复之前选中的会话。
         if let Some(id) = state(cx).selected {
             this.select(id, window, cx);
         }
@@ -102,7 +102,6 @@ impl AppView {
         if let Page::Chat(chat) = &self.page {
             chat.update(cx, |chat, cx| chat.on_message(msg, window, cx));
         }
-        // 会话列表按最近消息排序。
         self.reload_contacts(cx);
     }
 
@@ -118,96 +117,276 @@ impl AppView {
         }
     }
 
-    fn delete_contact(&mut self, contact: Contact, window: &mut Window, cx: &mut Context<Self>) {
-        let view = cx.entity().downgrade();
-        window.open_alert_dialog(cx, move |alert, _, _| {
-            let view = view.clone();
-            let contact = contact.clone();
-            alert
-                .title(format!("删除「{}」？", contact.name))
-                .description("聊天记录将被删除，已传输的文件会保留。")
-                .show_cancel(true)
-                .cancel_text("取消")
-                .ok_text("删除")
-                .ok_variant(ButtonVariant::Danger)
-                .on_ok(move |_, window, cx| {
-                    let core = core(cx);
-                    if let Err(e) = core.db(|db| db.delete_contact(contact.id)) {
-                        window.push_notification(Notification::error(format!("{e:#}")), cx);
-                        return true;
-                    }
-                    let app = cx.global_mut::<AppState>();
-                    app.unread.remove(&contact.id);
-                    app.auth_failed.remove(&contact.id);
-                    if app.selected == Some(contact.id) {
-                        app.selected = None;
-                    }
-                    refresh_tray(cx);
-                    let id = contact.id;
-                    let forget = core.clone();
-                    core.runtime
-                        .spawn(async move { crate::host::forget(&forget, id).await });
-                    let _ = view.update(cx, |view, cx| view.reload_contacts(cx));
-                    true
-                })
-        });
+    fn copy_ip(&mut self, ip: String, window: &mut Window, cx: &mut Context<Self>) {
+        cx.write_to_clipboard(ClipboardItem::new_string(ip.clone()));
+        window.push_notification(Notification::success(format!("已复制 {ip}")), cx);
+        self.copied = Some(ip);
+        cx.notify();
+        cx.spawn(async move |this, cx| {
+            cx.background_executor().timer(Duration::from_secs(2)).await;
+            let _ = this.update(cx, |this, cx| {
+                this.copied = None;
+                cx.notify();
+            });
+        })
+        .detach();
     }
 
-    fn contact_item(&self, contact: &Contact, cx: &mut Context<Self>) -> SidebarMenuItem {
+    fn delete_contact(&mut self, contact: Contact, window: &mut Window, cx: &mut Context<Self>) {
+        let view = cx.entity().downgrade();
+        let confirm = kit::Confirm {
+            title: format!("删除「{}」？", contact.name),
+            path: None,
+            body: "聊天记录将被删除，已传输的文件会保留。".into(),
+            ok: "删除",
+            danger: true,
+        };
+        kit::open_confirm(
+            confirm,
+            move |window, cx| {
+                let core = core(cx);
+                if let Err(e) = core.db(|db| db.delete_contact(contact.id)) {
+                    window.push_notification(Notification::error(format!("{e:#}")), cx);
+                    return;
+                }
+                let app = cx.global_mut::<AppState>();
+                app.unread.remove(&contact.id);
+                app.auth_failed.remove(&contact.id);
+                if app.selected == Some(contact.id) {
+                    app.selected = None;
+                }
+                refresh_tray(cx);
+                let (forget, id) = (core.clone(), contact.id);
+                core.runtime
+                    .spawn(async move { crate::host::forget(&forget, id).await });
+                let _ = view.update(cx, |view, cx| view.reload_contacts(cx));
+            },
+            window,
+            cx,
+        );
+    }
+
+    // ------------------------------------------------------------ 侧边栏
+
+    fn render_ips(&self, cx: &mut Context<Self>) -> AnyElement {
+        let theme = cx.theme().clone();
+        if self.ips.len() <= 1 {
+            let ip = self.ips.first().map(|(_, ip)| ip.clone());
+            let copied = ip.is_some() && self.copied == ip;
+            return h_flex()
+                .id("my-ip")
+                .px_4()
+                .py_3()
+                .gap_2()
+                .border_b_1()
+                .border_color(theme.sidebar_border)
+                .text_size(px(13.))
+                .when(ip.is_some(), |this| {
+                    this.cursor_pointer().hover(|s| s.bg(theme.sidebar_accent))
+                })
+                .child(div().text_color(theme.muted_foreground).child("本机 IP："))
+                .child(
+                    div()
+                        .flex_1()
+                        .font_semibold()
+                        .child(ip.clone().unwrap_or_else(|| "未连接网络".into())),
+                )
+                .when_some(ip, |this, ip| {
+                    this.child(
+                        div()
+                            .text_color(if copied {
+                                theme.success
+                            } else {
+                                theme.muted_foreground
+                            })
+                            .child(kit::icon(if copied { Ic::Check } else { Ic::Copy }, 14.)),
+                    )
+                    .on_click(
+                        cx.listener(move |this, _, window, cx| {
+                            this.copy_ip(ip.clone(), window, cx)
+                        }),
+                    )
+                })
+                .into_any_element();
+        }
+        v_flex()
+            .p_2()
+            .gap(px(2.))
+            .border_b_1()
+            .border_color(theme.sidebar_border)
+            .text_size(px(13.))
+            .child(
+                div()
+                    .px_2()
+                    .py(px(2.))
+                    .text_size(px(12.))
+                    .text_color(theme.muted_foreground)
+                    .child("本机 IP（点击复制）"),
+            )
+            .children(self.ips.iter().map(|(name, ip)| {
+                let copied = self.copied.as_deref() == Some(ip);
+                let ip = ip.clone();
+                h_flex()
+                    .id(SharedString::from(format!("ip-{ip}")))
+                    .px_2()
+                    .py(px(6.))
+                    .gap_2()
+                    .cursor_pointer()
+                    .when(copied, |this| this.bg(theme.sidebar_accent))
+                    .hover(|s| s.bg(theme.sidebar_accent))
+                    .child(div().flex_1().font_semibold().child(ip.clone()))
+                    .child(
+                        div()
+                            .text_size(px(12.))
+                            .text_color(theme.muted_foreground)
+                            .child(name.clone()),
+                    )
+                    .child(
+                        div()
+                            .text_color(if copied {
+                                theme.success
+                            } else {
+                                theme.muted_foreground
+                            })
+                            .child(kit::icon(if copied { Ic::Check } else { Ic::Copy }, 14.)),
+                    )
+                    .on_click(
+                        cx.listener(move |this, _, window, cx| {
+                            this.copy_ip(ip.clone(), window, cx)
+                        }),
+                    )
+            }))
+            .into_any_element()
+    }
+
+    fn group_header(
+        &self,
+        label: &'static str,
+        add_server: bool,
+        cx: &mut Context<Self>,
+    ) -> impl IntoElement {
+        h_flex()
+            .h(px(32.))
+            .pl_2()
+            .pr_1()
+            .text_size(px(12.))
+            .font_semibold()
+            .text_color(cx.theme().muted_foreground)
+            .child(div().flex_1().child(label))
+            .child(
+                Button::new(SharedString::from(format!("add-{label}")))
+                    .ghost()
+                    .size(px(24.))
+                    .icon(kit::icon(Ic::Plus, 16.))
+                    .text_color(cx.theme().foreground)
+                    .tooltip(if add_server {
+                        "添加服务器"
+                    } else {
+                        "添加联系人"
+                    })
+                    .on_click(cx.listener(move |_, _, window, cx| {
+                        if add_server {
+                            dialogs::server(dialogs::ServerMode::Add, window, cx)
+                        } else {
+                            dialogs::add_contact(window, cx)
+                        }
+                    })),
+            )
+    }
+
+    fn contact_row(&self, contact: &Contact, cx: &mut Context<Self>) -> impl IntoElement {
+        let theme = cx.theme().clone();
         let selected =
             matches!(&self.page, Page::Chat(chat) if chat.read(cx).contact_id() == contact.id);
         let unread = state(cx).unread.get(&contact.id).copied().unwrap_or(0);
-        let (label, icon) = match contact.kind {
-            ContactKind::Peer => (
-                format!("{} · {}", contact.name, contact.host),
-                Icon::new(IconName::User),
-            ),
-            ContactKind::Host => (
-                format!("{} · {}@{}", contact.name, contact.user, contact.host),
-                Icon::new(gpui_kit::assets::IconName::Server),
-            ),
+        let (avatar, secondary) = match contact.kind {
+            ContactKind::Peer => (kit::avatar_text(&contact.name, cx), contact.host.clone()),
+            ContactKind::Host => {
+                let port = if contact.port == 22 {
+                    String::new()
+                } else {
+                    format!(":{}", contact.port)
+                };
+                (
+                    kit::avatar_server(cx),
+                    format!("{}@{}{port}", contact.user, contact.host),
+                )
+            }
         };
         let id = contact.id;
         let view = cx.entity().downgrade();
         let for_menu = contact.clone();
-        SidebarMenuItem::new(label)
-            .icon(icon)
-            .active(selected)
+        h_flex()
+            .id(SharedString::from(format!("contact-{id}")))
+            .h(px(52.))
+            .px_2()
+            .gap_3()
+            .cursor_pointer()
+            .when(selected, |this| this.bg(theme.list_active))
+            .when(!selected, |this| this.hover(|s| s.bg(theme.sidebar_accent)))
+            .child(avatar)
+            .child(
+                v_flex()
+                    .flex_1()
+                    .min_w_0()
+                    .child(
+                        div()
+                            .text_size(px(14.))
+                            .font_semibold()
+                            .truncate()
+                            .child(contact.name.clone()),
+                    )
+                    .child(
+                        div()
+                            .text_size(px(12.))
+                            .text_color(theme.muted_foreground)
+                            .truncate()
+                            .child(secondary),
+                    ),
+            )
+            .when(unread > 0, |this| this.child(kit::badge(unread, cx)))
             .on_click(cx.listener(move |this, _, window, cx| this.select(id, window, cx)))
-            .when(unread > 0, |item| {
-                item.suffix(move |_, cx| {
-                    div()
-                        .px_1p5()
-                        .min_w_5()
-                        .rounded_full()
-                        .bg(cx.theme().danger)
-                        .text_color(cx.theme().danger_foreground)
-                        .text_xs()
-                        .text_center()
-                        .child(unread.to_string())
-                })
-            })
-            .context_menu(move |menu, _, _| {
+            .context_menu(move |menu, _, cx| {
                 let (edit, delete) = (for_menu.clone(), for_menu.clone());
                 let (view_edit, view_delete) = (view.clone(), view.clone());
-                menu.item(PopupMenuItem::new("编辑").on_click(move |_, window, cx| {
-                    let contact = edit.clone();
-                    let _ = view_edit.update(cx, |_, cx| match contact.kind {
-                        ContactKind::Peer => dialogs::edit_contact(contact, window, cx),
-                        ContactKind::Host => {
-                            dialogs::server(dialogs::ServerMode::Edit(contact), window, cx)
-                        }
-                    });
-                }))
-                .item(PopupMenuItem::new("删除").on_click(move |_, window, cx| {
-                    let contact = delete.clone();
-                    let _ =
-                        view_delete.update(cx, |view, cx| view.delete_contact(contact, window, cx));
-                }))
+                let danger = cx.theme().danger;
+                menu.min_w(px(160.))
+                    .item(
+                        PopupMenuItem::element(|_, _| {
+                            h_flex()
+                                .gap_2()
+                                .child(kit::icon(Ic::Pencil, 16.))
+                                .child("编辑")
+                        })
+                        .on_click(move |_, window, cx| {
+                            let contact = edit.clone();
+                            let _ = view_edit.update(cx, |_, cx| match contact.kind {
+                                ContactKind::Peer => dialogs::edit_contact(contact, window, cx),
+                                ContactKind::Host => {
+                                    dialogs::server(dialogs::ServerMode::Edit(contact), window, cx)
+                                }
+                            });
+                        }),
+                    )
+                    .item(
+                        PopupMenuItem::element(move |_, _| {
+                            h_flex()
+                                .gap_2()
+                                .text_color(danger)
+                                .child(kit::icon(Ic::Trash, 16.))
+                                .child("删除")
+                        })
+                        .on_click(move |_, window, cx| {
+                            let contact = delete.clone();
+                            let _ = view_delete
+                                .update(cx, |view, cx| view.delete_contact(contact, window, cx));
+                        }),
+                    )
             })
     }
 
     fn render_sidebar(&mut self, cx: &mut Context<Self>) -> impl IntoElement {
+        let theme = cx.theme().clone();
         let peers: Vec<_> = self
             .contacts
             .iter()
@@ -220,103 +399,119 @@ impl AppView {
             .filter(|c| c.kind == ContactKind::Host)
             .cloned()
             .collect();
-        let add_contact = SidebarMenuItem::new("添加联系人")
-            .icon(IconName::Plus)
-            .on_click(cx.listener(|_, _, window, cx| dialogs::add_contact(window, cx)));
-        let add_server = SidebarMenuItem::new("添加服务器")
-            .icon(IconName::Plus)
-            .on_click(cx.listener(|_, _, window, cx| {
-                dialogs::server(dialogs::ServerMode::Add, window, cx)
-            }));
-        let mut peer_items: Vec<_> = peers.iter().map(|c| self.contact_item(c, cx)).collect();
-        peer_items.push(add_contact);
-        let mut host_items: Vec<_> = hosts.iter().map(|c| self.contact_item(c, cx)).collect();
-        host_items.push(add_server);
-
-        let ips = if self.ips.is_empty() {
-            "未连接网络".to_string()
-        } else {
-            self.ips.join(" / ")
+        let empty_hint = |text: &'static str, bottom: f32| {
+            div()
+                .px_2()
+                .pt_1()
+                .pb(px(bottom))
+                .text_size(px(12.))
+                .line_height(px(18.))
+                .text_color(theme.muted_foreground)
+                .child(text)
         };
+        let peer_rows: Vec<_> = peers
+            .iter()
+            .map(|c| self.contact_row(c, cx).into_any_element())
+            .collect();
+        let host_rows: Vec<_> = hosts
+            .iter()
+            .map(|c| self.contact_row(c, cx).into_any_element())
+            .collect();
         let settings_active = matches!(self.page, Page::Settings(_));
-        Sidebar::new("sidebar")
+        v_flex()
             .w(px(260.))
-            .header(
-                SidebarHeader::new().child(
-                    div()
-                        .id("my-ip")
-                        .w_full()
-                        .cursor_pointer()
-                        .child(
-                            v_flex()
-                                .child(
-                                    div()
-                                        .text_xs()
-                                        .text_color(cx.theme().muted_foreground)
-                                        .child("本机 IP"),
-                                )
-                                .child(div().text_sm().child(ips.clone())),
-                        )
-                        .tooltip({
-                            let tip = SharedString::from("点击复制");
-                            move |window, cx| {
-                                gpui_kit::component::tooltip::Tooltip::new(tip.clone())
-                                    .build(window, cx)
-                            }
-                        })
-                        .on_click(move |_, window, cx| {
-                            cx.write_to_clipboard(ClipboardItem::new_string(ips.clone()));
-                            window.push_notification("已复制本机 IP", cx);
-                        }),
-                ),
+            .flex_none()
+            .h_full()
+            .bg(theme.sidebar)
+            .text_color(theme.sidebar_foreground)
+            .border_r_1()
+            .border_color(theme.sidebar_border)
+            .child(self.render_ips(cx))
+            .child(
+                v_flex()
+                    .id("sidebar-list")
+                    .flex_1()
+                    .min_h_0()
+                    .overflow_y_scroll()
+                    .p_2()
+                    .child(self.group_header("联系人", false, cx))
+                    .when(peers.is_empty(), |this| {
+                        this.child(empty_hint("点击「+」，输入对方 IP 即可添加。对方需已运行 Local Echo。", 16.))
+                    })
+                    .children(peer_rows)
+                    .child(div().mt_2().child(self.group_header("服务器", true, cx)))
+                    .when(hosts.is_empty(), |this| {
+                        this.child(empty_hint(
+                            "点击「+」，输入地址、用户名和密码添加一次。之后上传、下载和打开终端都无需再输入密码。",
+                            4.,
+                        ))
+                    })
+                    .children(host_rows),
             )
-            .child(SidebarGroup::new("联系人").child(SidebarMenu::new().children(peer_items)))
-            .child(SidebarGroup::new("服务器").child(SidebarMenu::new().children(host_items)))
-            .footer(
-                SidebarFooter::new().child(
-                    Button::new("settings")
-                        .ghost()
-                        .w_full()
-                        .justify_start()
-                        .icon(IconName::Settings)
-                        .label("设置")
-                        .selected(settings_active)
-                        .on_click(
-                            cx.listener(|this, _, window, cx| this.open_settings(window, cx)),
-                        ),
+            .child(
+                div().p_2().border_t_1().border_color(theme.sidebar_border).child(
+                    h_flex()
+                        .id("settings")
+                        .h(px(36.))
+                        .px_2()
+                        .gap_3()
+                        .text_size(px(14.))
+                        .cursor_pointer()
+                        .when(settings_active, |this| this.bg(theme.list_active))
+                        .when(!settings_active, |this| this.hover(|s| s.bg(theme.sidebar_accent)))
+                        .child(kit::icon(Ic::Settings, 16.))
+                        .child("设置")
+                        .on_click(cx.listener(|this, _, window, cx| this.open_settings(window, cx))),
                 ),
             )
     }
 
-    fn render_empty(&self, cx: &mut Context<Self>) -> impl IntoElement {
-        v_flex()
+    fn render_home(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        let heading = if self.contacts.is_empty() {
+            "在局域网内直接收发消息和文件，不经过任何服务器。"
+        } else {
+            "从左侧选择一个会话，或添加新的联系人和服务器。"
+        };
+        div()
             .size_full()
+            .flex()
             .items_center()
             .justify_center()
-            .gap_4()
-            .child(img(logo()).size(px(64.)))
+            .p_8()
             .child(
-                div()
-                    .text_color(cx.theme().muted_foreground)
-                    .child("在局域网内与联系人直接聊天、传文件，或与服务器互传文件"),
-            )
-            .child(
-                h_flex()
-                    .gap_3()
+                v_flex()
+                    .w(px(360.))
+                    .gap_4()
+                    .child(kit::mark(40.).text_color(cx.theme().primary))
                     .child(
-                        Button::new("empty-add-contact")
-                            .primary()
-                            .label("添加联系人")
-                            .on_click(
-                                cx.listener(|_, _, window, cx| dialogs::add_contact(window, cx)),
-                            ),
+                        div()
+                            .text_size(px(20.))
+                            .line_height(px(28.))
+                            .font_semibold()
+                            .child(heading),
                     )
                     .child(
-                        Button::new("empty-add-server")
-                            .label("添加服务器")
-                            .on_click(cx.listener(|_, _, window, cx| {
-                                dialogs::server(dialogs::ServerMode::Add, window, cx)
-                            })),
+                        h_flex()
+                            .mt_2()
+                            .gap_2()
+                            .child(
+                                Button::new("home-add-contact")
+                                    .primary()
+                                    .icon(kit::icon(Ic::UserPlus, 16.))
+                                    .label("添加联系人")
+                                    .on_click(cx.listener(|_, _, window, cx| {
+                                        dialogs::add_contact(window, cx)
+                                    })),
+                            )
+                            .child(
+                                Button::new("home-add-server")
+                                    .secondary()
+                                    .icon(kit::icon(Ic::Server, 16.))
+                                    .label("添加服务器")
+                                    .on_click(cx.listener(|_, _, window, cx| {
+                                        dialogs::server(dialogs::ServerMode::Add, window, cx)
+                                    })),
+                            ),
                     ),
             )
     }
@@ -325,28 +520,40 @@ impl AppView {
 impl Render for AppView {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let page = match &self.page {
-            Page::Empty => self.render_empty(cx).into_any_element(),
+            Page::Empty => self.render_home(cx).into_any_element(),
             Page::Chat(chat) => chat.clone().into_any_element(),
             Page::Settings(settings) => settings.clone().into_any_element(),
         };
+        let theme = cx.theme().clone();
         v_flex()
             .size_full()
-            .bg(cx.theme().background)
-            .text_color(cx.theme().foreground)
+            .bg(theme.background)
+            .text_color(theme.foreground)
             .child(
-                TitleBar::new().child(
-                    h_flex()
-                        .gap_2()
-                        .child(img(logo()).size(px(18.)))
-                        .child(div().text_sm().child("Local Echo")),
-                ),
+                TitleBar::new()
+                    .h(px(36.))
+                    .bg(theme.title_bar)
+                    .border_color(theme.title_bar_border)
+                    .child(
+                        h_flex()
+                            .gap_2()
+                            .child(kit::mark(16.).text_color(theme.foreground))
+                            .child(div().text_size(px(13.)).font_semibold().child("Local Echo")),
+                    ),
             )
             .child(
                 h_flex()
                     .flex_1()
                     .min_h_0()
                     .child(self.render_sidebar(cx))
-                    .child(div().flex_1().min_w_0().h_full().child(page)),
+                    .child(
+                        div()
+                            .flex_1()
+                            .min_w_0()
+                            .h_full()
+                            .bg(theme.background)
+                            .child(page),
+                    ),
             )
     }
 }

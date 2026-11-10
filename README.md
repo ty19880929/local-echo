@@ -35,13 +35,15 @@ LE_SSH=192.168.1.20:22 LE_SSH_USER=user LE_SSH_PASS='***' cargo test ssh_tests -
 
 ## 品牌与界面资源
 
-`assets/` 下的图标目前是占位图。Claude Design 产出后，按同样的文件名替换即可：
+界面按 Claude Design 交付的高保真稿实现，设计源文件归档在 [docs/ui](docs/ui/)（入口：`Local Echo 界面.dc.html`，规格见 `Local Echo 规范.dc.html`）。
 
 | 文件 | 用途 |
 |---|---|
-| `assets/app.ico` | Windows exe 和安装程序图标 |
-| `assets/icons/hicolor/{48,128,256,512}x…/apps/local-echo.png` | Linux 应用图标 |
-| `assets/tray.png` / `assets/tray-unread.png` | 托盘图标（常规 / 有未读），32×32 |
+| `assets/theme.json` | gpui-kit 主题（Local Echo Light / Dark），跟随系统明暗 |
+| `assets/brand/mark*.svg` | 品牌图形（标题栏、空状态、关于），按前景色 / 品牌色着色 |
+| `assets/app.ico` | Windows exe 与安装程序图标 |
+| `assets/icons/hicolor/…` | Linux 应用图标（48–512 PNG + scalable SVG） |
+| `assets/tray/tray-on-{light,dark}[-unread]-{16,20,24,32}.png` | 托盘图标：Windows 按任务栏明暗与缩放选取，Linux 用 on-dark 32 px |
 
 ## 防火墙
 

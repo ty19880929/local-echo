@@ -13,7 +13,7 @@ russh-sftp = "3"
 rand = "0.10"
 rusqlite = { version = "0.41", features = ["bundled"] }
 tray-icon = { version = "0.26", default-features = false, features = ["ksni"] }
-image = { version = "0.25", default-features = false, features = ["png"] }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v4"] }
@@ -45,6 +45,7 @@ assets = [
   ["assets/icons/hicolor/128x128/apps/local-echo.png", "usr/share/icons/hicolor/128x128/apps/", "644"],
   ["assets/icons/hicolor/256x256/apps/local-echo.png", "usr/share/icons/hicolor/256x256/apps/", "644"],
   ["assets/icons/hicolor/512x512/apps/local-echo.png", "usr/share/icons/hicolor/512x512/apps/", "644"],
+  ["assets/icons/hicolor/scalable/apps/local-echo.svg", "usr/share/icons/hicolor/scalable/apps/", "644"],
 ]
 
 [package.metadata.generate-rpm]
@@ -55,6 +56,7 @@ assets = [
   { source = "assets/icons/hicolor/128x128/apps/local-echo.png", dest = "/usr/share/icons/hicolor/128x128/apps/local-echo.png", mode = "644" },
   { source = "assets/icons/hicolor/256x256/apps/local-echo.png", dest = "/usr/share/icons/hicolor/256x256/apps/local-echo.png", mode = "644" },
   { source = "assets/icons/hicolor/512x512/apps/local-echo.png", dest = "/usr/share/icons/hicolor/512x512/apps/local-echo.png", mode = "644" },
+  { source = "assets/icons/hicolor/scalable/apps/local-echo.svg", dest = "/usr/share/icons/hicolor/scalable/apps/local-echo.svg", mode = "644" },
 ]
 
 [package.metadata.generate-rpm.requires]

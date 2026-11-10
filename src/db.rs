@@ -174,7 +174,6 @@ impl Db {
         Ok(rows.collect::<rusqlite::Result<_>>()?)
     }
 
-    #[cfg(test)]
     pub fn message(&self, id: &str) -> Result<Option<Message>> {
         let sql = format!("SELECT {MESSAGE_COLS} FROM message WHERE id = ?1");
         Ok(self.0.query_row(&sql, [id], message_from_row).optional()?)

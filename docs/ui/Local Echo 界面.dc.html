@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-37784dd1-9c50-459d-b8de-89e4f5f0d6ce/styles.css">
+<script src="_ds/modernist-37784dd1-9c50-459d-b8de-89e4f5f0d6ce/_ds_bundle.js"></script>
+<style>body{margin:0;background:#f3f2f2}a{color:#ae1800}a:hover{color:#7c1405}</style>
+</helmet>
+<div style="padding:64px;display:flex;flex-direction:column;gap:64px;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);min-width:2200px">
+  <header style="display:flex;align-items:flex-end;gap:32px;padding-bottom:16px;border-bottom:2px solid var(--color-divider)">
+    <img src="brand/svg/mark-red.svg" alt="" style="width:56px;height:56px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+      <span style="font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">高保真设计稿 · 1000 × 680 · 浅色 / 深色</span>
+      <h1 style="margin:0;font-size:56px">Local Echo 界面</h1>
+    </div>
+    <nav style="display:flex;gap:24px;font-size:16px;font-weight:600"><a href="Local Echo 品牌.dc.html">品牌与 Logo</a><a href="Local Echo 规范.dc.html">组件规格 · 色板 · 设计说明</a></nav>
+  </header>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">01 主窗口与侧边栏 · 02 未选中会话</h2>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">01-A 首次启动：两个分组都为空 · 浅色</span><dc-import name="LE Window" theme="light" scene="empty" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">01-A · 深色</span><dc-import name="LE Window" theme="dark" scene="empty" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">01-B / 02 未选中会话 · 多个本机 IP · 已复制提示 · 悬停「王晓明」 · 浅色</span><dc-import name="LE Window" theme="light" scene="home" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">01-B / 02 · 深色</span><dc-import name="LE Window" theme="dark" scene="home" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">01-C 选中「老李」 · 右键「李四」：编辑 / 删除 · 浅色</span><dc-import name="LE Window" theme="light" scene="menu" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">01-C · 深色</span><dc-import name="LE Window" theme="dark" scene="menu" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">01-D 删除二次确认 · 浅色</span><dc-import name="LE Window" theme="light" scene="delete" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">01-D · 深色</span><dc-import name="LE Window" theme="dark" scene="delete" hint-size="1000px,680px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">03 联系人会话</h2>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-A 文本：短文本 · 多行长文本 · 日期分隔 · 发送中 · 发送失败 · 浅色</span><dc-import name="LE Window" theme="light" scene="chat-text" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-A · 深色</span><dc-import name="LE Window" theme="dark" scene="chat-text" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-B 图片：横图 240×135 · 竖图 135×240 · 小图原尺寸 · 浅色</span><dc-import name="LE Window" theme="light" scene="chat-images" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-B · 深色</span><dc-import name="LE Window" theme="dark" scene="chat-images" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-C 文件：已完成 · 传输中 · 发送失败 · 「新消息」按钮 · 文件已保存 · 浅色</span><dc-import name="LE Window" theme="light" scene="chat-files" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-C · 深色</span><dc-import name="LE Window" theme="dark" scene="chat-files" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-D 输入多行：输入框自动增高（最多 6 行） · 浅色</span><dc-import name="LE Window" theme="light" scene="chat-typing" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-D · 深色</span><dc-import name="LE Window" theme="dark" scene="chat-typing" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-E 设备不匹配导致发送失败 · 「编辑」入口 · 浅色</span><dc-import name="LE Window" theme="light" scene="chat-mismatch" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-E · 深色</span><dc-import name="LE Window" theme="dark" scene="chat-mismatch" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-F 拖入文件 · 浅色</span><dc-import name="LE Window" theme="light" scene="chat-drop" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">03-F · 深色</span><dc-import name="LE Window" theme="dark" scene="chat-drop" hint-size="1000px,680px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">04 服务器会话</h2>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">04-A 上传已完成 · 下载已完成 · 上传中 · 下载中 · 浅色</span><dc-import name="LE Window" theme="light" scene="server" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">04-A · 深色</span><dc-import name="LE Window" theme="dark" scene="server" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">04-B 密钥失效横幅 · 上传失败 · 下载失败 · 未找到终端 · 浅色</span><dc-import name="LE Window" theme="light" scene="server-error" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">04-B · 深色</span><dc-import name="LE Window" theme="dark" scene="server-error" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">04-C 拖入文件上传 · 浅色</span><dc-import name="LE Window" theme="light" scene="server-drop" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">04-C · 深色</span><dc-import name="LE Window" theme="dark" scene="server-drop" hint-size="1000px,680px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">05 同名文件确认 · 480 宽</h2>
+    <p style="margin:0;font-size:16px;line-height:1.6;max-width:960px;text-wrap:pretty">只针对文件，发送图片不弹出。一次拖入多个文件时，只列出有同名记录的文件。</p>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">05-A 联系人：已发送过同名文件</span><dc-import name="LE Window" theme="light" scene="dup-peer" hint-size="480px,300px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">05-B 服务器：已上传过同名文件 · 超过 4 行时列表内滚动</span><dc-import name="LE Window" theme="light" scene="dup-server" hint-size="480px,340px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">05-A · 深色</span><dc-import name="LE Window" theme="dark" scene="dup-peer" hint-size="480px,300px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">05-B · 深色</span><dc-import name="LE Window" theme="dark" scene="dup-server" hint-size="480px,340px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">06 远程目录浏览器 · 640 × 480</h2>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">06-A 选择目录（文件置灰不可选）</span><dc-import name="LE Window" theme="light" scene="browser-dir" hint-size="640px,480px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">06-B 选择文件 · 多选</span><dc-import name="LE Window" theme="light" scene="browser-files" hint-size="640px,480px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">06-C 加载中</span><dc-import name="LE Window" theme="light" scene="browser-loading" hint-size="640px,480px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">06-D 空目录</span><dc-import name="LE Window" theme="light" scene="browser-empty" hint-size="640px,480px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">06-E 无法读取</span><dc-import name="LE Window" theme="light" scene="browser-error" hint-size="640px,480px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">06-A · 深色</span><dc-import name="LE Window" theme="dark" scene="browser-dir" hint-size="640px,480px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">06-B · 深色</span><dc-import name="LE Window" theme="dark" scene="browser-files" hint-size="640px,480px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">06-C · 深色</span><dc-import name="LE Window" theme="dark" scene="browser-loading" hint-size="640px,480px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">06-D · 深色</span><dc-import name="LE Window" theme="dark" scene="browser-empty" hint-size="640px,480px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">06-E · 深色</span><dc-import name="LE Window" theme="dark" scene="browser-error" hint-size="640px,480px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">07 添加 / 编辑联系人 · 400 宽</h2>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">07-A 添加：默认</span><dc-import name="LE Window" theme="light" scene="add-peer" hint-size="400px,300px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">07-B 添加：连接中</span><dc-import name="LE Window" theme="light" scene="add-peer-loading" hint-size="400px,300px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">07-C 添加：连接失败</span><dc-import name="LE Window" theme="light" scene="add-peer-error" hint-size="400px,320px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">07-D 编辑联系人</span><dc-import name="LE Window" theme="light" scene="edit-peer" hint-size="400px,300px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">07-A · 深色</span><dc-import name="LE Window" theme="dark" scene="add-peer" hint-size="400px,300px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">07-B · 深色</span><dc-import name="LE Window" theme="dark" scene="add-peer-loading" hint-size="400px,300px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">07-C · 深色</span><dc-import name="LE Window" theme="dark" scene="add-peer-error" hint-size="400px,320px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">07-D · 深色</span><dc-import name="LE Window" theme="dark" scene="edit-peer" hint-size="400px,300px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">08 添加 / 编辑服务器 / 重新授权 · 440 宽</h2>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-A 添加：默认</span><dc-import name="LE Window" theme="light" scene="add-server" hint-size="440px,520px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-B 步骤进行中</span><dc-import name="LE Window" theme="light" scene="add-server-progress" hint-size="440px,520px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-C 失败：无法连接</span><dc-import name="LE Window" theme="light" scene="add-server-fail-conn" hint-size="440px,520px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-D 失败：密码错误</span><dc-import name="LE Window" theme="light" scene="add-server-fail-pw" hint-size="440px,520px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-E 失败：密钥登录</span><dc-import name="LE Window" theme="light" scene="add-server-fail-key" hint-size="440px,540px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-F 编辑服务器</span><dc-import name="LE Window" theme="light" scene="edit-server" hint-size="440px,400px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-G 重新授权</span><dc-import name="LE Window" theme="light" scene="reauth" hint-size="440px,500px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-H 重新授权：进行中</span><dc-import name="LE Window" theme="light" scene="reauth-progress" hint-size="440px,520px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-A · 深色</span><dc-import name="LE Window" theme="dark" scene="add-server" hint-size="440px,520px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-B · 深色</span><dc-import name="LE Window" theme="dark" scene="add-server-progress" hint-size="440px,520px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-C · 深色</span><dc-import name="LE Window" theme="dark" scene="add-server-fail-conn" hint-size="440px,520px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-D · 深色</span><dc-import name="LE Window" theme="dark" scene="add-server-fail-pw" hint-size="440px,520px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-E · 深色</span><dc-import name="LE Window" theme="dark" scene="add-server-fail-key" hint-size="440px,540px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-F · 深色</span><dc-import name="LE Window" theme="dark" scene="edit-server" hint-size="440px,400px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-G · 深色</span><dc-import name="LE Window" theme="dark" scene="reauth" hint-size="440px,500px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">08-H · 深色</span><dc-import name="LE Window" theme="dark" scene="reauth-progress" hint-size="440px,520px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">09 设置（建议：在右侧会话区内显示）</h2>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">09-A 设置：数据目录 · 开机自动启动 · 关于 · 退出 · 浅色</span><dc-import name="LE Window" theme="light" scene="settings" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">09-A · 深色</span><dc-import name="LE Window" theme="dark" scene="settings" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">09-B 迁移被阻止（点击「更改…」时） · 浅色</span><dc-import name="LE Window" theme="light" scene="settings-blocked" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">09-B · 深色</span><dc-import name="LE Window" theme="dark" scene="settings-blocked" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">09-C 目标目录已有数据</span><dc-import name="LE Window" theme="light" scene="migrate-existing" hint-size="420px,240px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">09-D 目标目录没有数据</span><dc-import name="LE Window" theme="light" scene="migrate-move" hint-size="420px,180px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">09-E 迁移进度</span><dc-import name="LE Window" theme="light" scene="migrate-progress" hint-size="420px,180px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">09-C · 深色</span><dc-import name="LE Window" theme="dark" scene="migrate-existing" hint-size="420px,240px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">09-D · 深色</span><dc-import name="LE Window" theme="dark" scene="migrate-move" hint-size="420px,180px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">09-E · 深色</span><dc-import name="LE Window" theme="dark" scene="migrate-progress" hint-size="420px,180px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">10 托盘</h2>
+    <p style="margin:0;font-size:16px;line-height:1.6;max-width:960px;text-wrap:pretty">托盘图标为单色图形 + 品牌红未读圆点。按任务栏明暗选用两套 PNG：Windows 读取「SystemUsesLightTheme」，浅色用 on-light，深色用 on-dark；Linux 默认 on-dark。100% 缩放用 16 px，125% 用 20 px，150% 用 24 px，200% 用 32 px。</p>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">10-A Windows 浅色任务栏</span>
+        <div style="width:420px;height:48px;background:#F3F3F3;display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 16px;box-sizing:border-box;font-family:'Segoe UI','Microsoft YaHei UI',system-ui,sans-serif;font-size:12px;color:#1B1B1B">
+          <img src="brand/tray/tray-on-light-16.png" alt="" style="width:16px;height:16px">
+          <img src="brand/tray/tray-on-light-unread-16.png" alt="" style="width:16px;height:16px">
+          <span>14:32</span>
+        </div>
+        <span style="font-size:13px;color:var(--color-neutral-700)">常规 · 有未读 · tray-on-light-*.png</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">10-B Windows 深色任务栏</span>
+        <div style="width:420px;height:48px;background:#1F1F1F;display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 16px;box-sizing:border-box;font-family:'Segoe UI','Microsoft YaHei UI',system-ui,sans-serif;font-size:12px;color:#FFFFFF">
+          <img src="brand/tray/tray-on-dark-16.png" alt="" style="width:16px;height:16px">
+          <img src="brand/tray/tray-on-dark-unread-16.png" alt="" style="width:16px;height:16px">
+          <span>14:32</span>
+        </div>
+        <span style="font-size:13px;color:var(--color-neutral-700)">常规 · 有未读 · tray-on-dark-*.png</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">10-C Linux 深色顶栏（GNOME）</span>
+        <div style="width:420px;height:32px;background:#000000;display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 16px;box-sizing:border-box;font-family:'Segoe UI','Microsoft YaHei UI',system-ui,sans-serif;font-size:12px;color:#FFFFFF">
+          <img src="brand/tray/tray-on-dark-16.png" alt="" style="width:16px;height:16px">
+          <img src="brand/tray/tray-on-dark-unread-16.png" alt="" style="width:16px;height:16px">
+          <span>14:32</span>
+        </div>
+        <span style="font-size:13px;color:var(--color-neutral-700)">常规 · 有未读 · tray-on-dark-*.png</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">10-D 悬停提示（系统原生）</span>
+        <div style="display:flex;gap:16px;align-items:flex-start;font-family:'Segoe UI','Microsoft YaHei UI',system-ui,sans-serif;font-size:12px">
+          <div style="padding:6px 10px;background:#F9F9F9;border:1px solid #E5E5E5;color:#1B1B1B">Local Echo</div>
+          <div style="padding:6px 10px;background:#F9F9F9;border:1px solid #E5E5E5;color:#1B1B1B">Local Echo · 3 条未读</div>
+          <div style="padding:6px 10px;background:#2B2B2B;border:1px solid #3A3A3A;color:#FFFFFF">Local Echo · 3 条未读</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">10-E 右键菜单（系统原生，仅确认文案）</span>
+        <div style="display:flex;gap:16px;align-items:flex-start;font-family:'Segoe UI','Microsoft YaHei UI',system-ui,sans-serif;font-size:14px">
+          <div style="width:180px;padding:4px;background:#F9F9F9;border:1px solid #E5E5E5;color:#1B1B1B;display:flex;flex-direction:column"><div style="height:32px;display:flex;align-items:center;padding:0 12px;font-weight:600">打开 Local Echo</div><div style="height:1px;margin:4px 0;background:#E5E5E5"></div><div style="height:32px;display:flex;align-items:center;padding:0 12px">退出</div></div>
+          <div style="width:180px;padding:4px;background:#2B2B2B;border:1px solid #3A3A3A;color:#FFFFFF;display:flex;flex-direction:column"><div style="height:32px;display:flex;align-items:center;padding:0 12px;font-weight:600">打开 Local Echo</div><div style="height:1px;margin:4px 0;background:#3A3A3A"></div><div style="height:32px;display:flex;align-items:center;padding:0 12px">退出</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">11 全局提示</h2>
+    <p style="margin:0;font-size:16px;line-height:1.6;max-width:960px;text-wrap:pretty">其余 Toast 见 01-B「已复制」、03-C「文件已保存」、04-B「未找到可用的终端程序」。位置：窗口右上角，标题栏下方 12 px。</p>
+    <div style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">11-A Toast：该联系人已在列表中，已更新 IP 和昵称 · 浅色</span><dc-import name="LE Window" theme="light" scene="contact-updated" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">11-A · 深色</span><dc-import name="LE Window" theme="dark" scene="contact-updated" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">11-B 错误对话框：端口被占用（主窗口创建前弹出）</span><dc-import name="LE Window" theme="light" scene="startup" hint-size="420px,180px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">11-B · 深色</span><dc-import name="LE Window" theme="dark" scene="startup" hint-size="420px,180px"></dc-import></div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+</body>
+</html>

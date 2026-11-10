@@ -16,16 +16,48 @@ use tokio::{net::TcpListener, sync::mpsc::unbounded_channel};
 
 use crate::{core::Core, db::Db};
 
-// 默认图标集之外用到的 Lucide 图标，按需嵌入。
+// 默认图标集之外、设计稿用到的 Lucide 图标，按需嵌入。
 gpui_kit::assets::icon_assets!(
     ExtraIcons,
-    [Server, Paperclip, SendHorizontal, Download, Upload]
+    [
+        X,
+        Circle,
+        Lock,
+        KeyRound,
+        ShieldCheck,
+        CornerLeftUp,
+        Presentation,
+        LogOut,
+        FileArchive,
+        FileImage,
+        FileCode,
+        UserPlus,
+        Pencil,
+        Trash,
+        Server,
+        Paperclip,
+        SendHorizontal,
+        Download,
+        Upload
+    ]
 );
+
+/// 品牌图形（docs/ui/brand，去掉元数据后的精简版）。
+const BRAND: [(&str, &[u8]); 2] = [
+    ("brand/mark.svg", include_bytes!("../assets/brand/mark.svg")),
+    (
+        "brand/mark-16.svg",
+        include_bytes!("../assets/brand/mark-16.svg"),
+    ),
+];
 
 struct AppAssets;
 
 impl AssetSource for AppAssets {
     fn load(&self, path: &str) -> gpui_kit::Result<Option<Cow<'static, [u8]>>> {
+        if let Some((_, bytes)) = BRAND.iter().find(|(p, _)| *p == path) {
+            return Ok(Some(Cow::Borrowed(bytes)));
+        }
         if let Some(bytes) = ExtraIcons.load(path)? {
             return Ok(Some(bytes));
         }
@@ -35,6 +67,12 @@ impl AssetSource for AppAssets {
     fn list(&self, path: &str) -> gpui_kit::Result<Vec<SharedString>> {
         let mut paths = gpui_kit::assets::Assets.list(path)?;
         paths.extend(ExtraIcons.list(path)?);
+        paths.extend(
+            BRAND
+                .iter()
+                .filter(|(p, _)| p.starts_with(path))
+                .map(|(p, _)| SharedString::from(*p)),
+        );
         paths.sort();
         paths.dedup();
         Ok(paths)
@@ -86,6 +124,7 @@ fn main() {
             gpui_kit::init(cx);
             match startup {
                 Startup::Ready(core, listener) => {
+                    ui::apply_brand_theme(cx);
                     core.runtime.spawn(peer::serve(core.clone(), listener));
                     let tray = desktop::Tray::new(core.sender())
                         .map_err(|e| eprintln!("托盘不可用：{e:#}"))

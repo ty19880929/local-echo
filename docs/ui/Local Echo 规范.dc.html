@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/modernist-37784dd1-9c50-459d-b8de-89e4f5f0d6ce/styles.css">
+<script src="_ds/modernist-37784dd1-9c50-459d-b8de-89e4f5f0d6ce/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:#ae1800}a:hover{color:#7c1405}</style>
+</helmet>
+<div style="max-width:1280px;margin:0 auto;padding:48px 32px 96px;display:flex;flex-direction:column;gap:56px;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+  <header style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:24px;padding-bottom:16px;border-bottom:2px solid var(--color-divider)">
+    <div style="flex:1;min-width:280px;display:flex;flex-direction:column;gap:4px">
+      <span style="font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">实现规格 · gpui-kit</span>
+      <h1 style="margin:0;font-size:48px">Local Echo 规范</h1>
+    </div>
+    <nav style="display:flex;gap:24px;font-size:15px;font-weight:600"><a href="Local Echo 界面.dc.html">高保真界面</a><a href="Local Echo 品牌.dc.html">品牌与 Logo</a></nav>
+  </header>
+
+  <section style="display:flex;flex-direction:column;gap:24px">
+    <h2 style="margin:0;font-size:28px">设计说明</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px;border-top:2px solid var(--color-divider);padding-top:24px;font-size:15px;line-height:1.65">
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">Logo 寓意</h4><p style="margin:0;text-wrap:pretty">两个点代表局域网里的两台机器，各自发出的一道弧在中间相遇，是一次没有中间人的往返。图形只有点和等粗弧线，16 px 下仍可辨认，单色与反白都成立；刻意避开云、地球和单向发射的波纹。</p></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">色彩</h4><p style="margin:0;text-wrap:pretty">整套界面只有一个强调色：红。品牌红 #EC3013 用于 Logo；界面里的 primary 取深一级的 #DD2B0F，让白字在我方气泡和主按钮上达到 AA（4.8 : 1）。其余全部是带一点暖调的中性灰。错误状态同属红色系，因此失败一律配图标和文字（「发送失败 · 重试」），不只靠颜色区分。</p></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">形态</h4><p style="margin:0;text-wrap:pretty">零圆角、1 px 边框、只在浮层上用阴影。气泡、卡片、按钮全部是直角矩形，靠色块与左右位置区分双方，和「工程感、安静」的品牌词一致。这一点与需求中的「小圆角」不同：圆角在主题中集中为 radius / radius.lg 两个值，改为 4 px 只需改这两处，设计稿其余部分不受影响。</p></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">设置放在哪</h4><p style="margin:0;text-wrap:pretty">建议在右侧会话区内显示，侧边栏底部「设置」保持选中态。设置项只有两组，用对话框会显得空；放在会话区里，迁移确认和进度再用对话框叠加，层级清楚。</p></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">关键交互取舍</h4><p style="margin:0;text-wrap:pretty">服务器会话没有输入框，底部只留拖拽区和「上传文件」，避免用户以为能执行命令。设备不匹配的失败提示直接给出「编辑」，一步打开编辑联系人；同名文件确认只列出有同名记录的文件，超过 4 行在列表内滚动。远程目录浏览器在「选择目录」模式下文件置灰不可选；「选择文件」模式靠行选中态多选，不额外加复选框列。传输中的卡片右上角给出取消（x），失败卡片把「重试」放在卡片底部操作行。</p></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">文案建议</h4><p style="margin:0;text-wrap:pretty">多 IP 时，标题写「本机 IP（点击复制）」，每行附网卡名（以太网 / WLAN）。「下载文件」打开的浏览器标题用「下载文件」，「更改」打开的用「选择远程目录」。迁移确认补一句「切换后应用会自动重启」，让用户在点击前就知道。端口占用错误加标题「无法启动 Local Echo」。「退出 Local Echo」旁补一句「关闭窗口时 Local Echo 会继续在托盘中运行」，解释它和关闭窗口的区别。</p></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:24px">
+    <h2 style="margin:0;font-size:28px">基础</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px;border-top:2px solid var(--color-divider);padding-top:24px">
+      <table class="table">
+        <thead><tr><th>字号层级（≤ 5 级）</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td>20 / 28 · 600</td><td>空状态标题、拖拽覆盖层</td></tr>
+          <tr><td>16 / 22 · 600</td><td>会话头部名称、对话框标题</td></tr>
+          <tr><td>14 / 22 · 400 / 600</td><td>正文、气泡、列表名称、按钮</td></tr>
+          <tr><td>13 / 20 · 400</td><td>路径、说明框、卡片操作</td></tr>
+          <tr><td>12 / 18 · 400</td><td>IP、时间、大小、提示、错误</td></tr>
+        </tbody>
+      </table>
+      <table class="table">
+        <thead><tr><th>参数</th><th>值</th></tr></thead>
+        <tbody>
+          <tr><td>字体</td><td>Segoe UI, Microsoft YaHei UI → Linux 系统无衬线（Noto Sans CJK SC）；路径用系统等宽</td></tr>
+          <tr><td>间距</td><td>4 px 栅格：4 · 8 · 12 · 16 · 24 · 32</td></tr>
+          <tr><td>圆角</td><td>0（radius、radius.lg）</td></tr>
+          <tr><td>边框</td><td>1 px border / input.border；拖拽区 1 px 虚线</td></tr>
+          <tr><td>阴影</td><td>仅浮层：Popover / Toast 0 3 10，Dialog 0 12 32</td></tr>
+          <tr><td>动效</td><td>悬停、按下、浮层出现、进度变化，≤ 150 ms，ease-out</td></tr>
+          <tr><td>窗口</td><td>默认 1000 × 680，最小 760 × 520；标题栏 36</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:24px">
+    <h2 style="margin:0;font-size:28px">组件规格</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:32px 40px;border-top:2px solid var(--color-divider);padding-top:24px">
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">侧边栏 · Sidebar</h4>
+        <table class="table"><tbody>
+          <tr><td>宽度</td><td>260，背景 sidebar.background，右边框 sidebar.border</td></tr>
+          <tr><td>本机 IP 区</td><td>内边距 12 16；13 px；底边框 1</td></tr>
+          <tr><td>组标题</td><td>高 32，12 px 600 muted.foreground；「+」ghost 图标按钮 24</td></tr>
+          <tr><td>联系人条目</td><td>高 52，内边距 0 8，间距 12；头像 32（取昵称首字）；昵称 14/600，IP 12 muted</td></tr>
+          <tr><td>服务器条目</td><td>高 52，同联系人；图标底 32（Lucide server 16）；名称 14/600，user@host 12 muted，端口 ≠ 22 时追加 :port；均单行省略</td></tr>
+          <tr><td>状态</td><td>悬停 sidebar.accent.background；选中 list.active.background</td></tr>
+          <tr><td>未读徽标</td><td>高 20，最小宽 20，内边距 0 6；primary 底，12/600</td></tr>
+          <tr><td>右键菜单</td><td>Popover 宽 160，内边距 4；项高 32：「编辑」pencil · 「删除」trash-2，文字 danger</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">消息气泡 · Message / Bubble</h4>
+        <table class="table"><tbody>
+          <tr><td>我方</td><td>primary.background / primary.foreground，右对齐</td></tr>
+          <tr><td>对方</td><td>secondary.background / secondary.foreground，左对齐 + 头像 32</td></tr>
+          <tr><td>内边距 · 字号</td><td>8 12；14 / 22；最大宽 440，长文本自然换行</td></tr>
+          <tr><td>分组</td><td>MessageGroup 内间距 4，组间距 16；元信息 12 muted</td></tr>
+          <tr><td>发送中</td><td>气泡 70% 不透明，左侧 Spinner 14 +「发送中」</td></tr>
+          <tr><td>发送失败</td><td>左侧 circle-alert 14 + 「发送失败 ·」danger + 「重试」link</td></tr>
+          <tr><td>设备不匹配</td><td>气泡下方一行，最大宽 440，12/18 danger 可换行；末尾 pencil 12 +「编辑」link</td></tr>
+          <tr><td>图片</td><td>最大 240 × 240 等比；小于此尺寸按原尺寸；1 px border</td></tr>
+          <tr><td>日期分隔</td><td>12 muted，两侧 1 px border 线</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">文件卡片 · Attachment</h4>
+        <table class="table"><tbody>
+          <tr><td>尺寸</td><td>宽 320（服务器 340）；popover.background，1 px border</td></tr>
+          <tr><td>主体</td><td>内边距 12，间距 12；类型图标底 40（muted.background，图标 20）</td></tr>
+          <tr><td>文本</td><td>文件名 14/600 单行中间省略；远端路径 12 等宽 muted；大小 12 muted</td></tr>
+          <tr><td>进度</td><td>高 4，轨道 primary 15%，填充 progress_bar.background；右上取消 x 16</td></tr>
+          <tr><td>已完成</td><td>底部操作行 高 32，上边框 1；「打开」「打开所在文件夹」13/600 link</td></tr>
+          <tr><td>失败</td><td>操作行：circle-alert + 「发送 / 上传 / 下载失败 ·」danger + rotate-cw「重试」</td></tr>
+          <tr><td>图标映射</td><td>file-text · file-archive · file-image · file-code · presentation · file</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">输入区 · Textarea</h4>
+        <table class="table"><tbody>
+          <tr><td>容器</td><td>内边距 12 16，间距 8，上边框 1，底对齐</td></tr>
+          <tr><td>按钮</td><td>附件 paperclip：ghost 36 × 36，图标 18（无表情按钮）</td></tr>
+          <tr><td>输入框</td><td>最小高 36，内边距 7 12，14 / 20；自动增高至 6 行（134）后滚动</td></tr>
+          <tr><td>聚焦</td><td>边框 ring；caret 色 caret</td></tr>
+          <tr><td>发送</td><td>primary 36 × 36（send-horizontal 18）；内容为空时 45% 不透明</td></tr>
+          <tr><td>新消息按钮</td><td>MessageScroller 内置；高 32，居中距底 16，popover 底 + 阴影</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">拖拽区 · 覆盖层</h4>
+        <table class="table"><tbody>
+          <tr><td>服务器拖拽区</td><td>高 40，1 px 虚线 input.border，内边距 0 12；upload 16 + 13 px muted</td></tr>
+          <tr><td>上传按钮</td><td>primary，高 40，内边距 0 16</td></tr>
+          <tr><td>拖入覆盖层</td><td>覆盖会话区；底色 drop_target.background；内缩 12 的 1 px 虚线 drag_border</td></tr>
+          <tr><td>覆盖层文字</td><td>upload 32（primary）+ 20 / 600</td></tr>
+          <tr><td>密钥失效横幅</td><td>Alert：base.red.light 底，内边距 10 24；key-round 16 danger；右侧 primary「重新授权」</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">对话框 · Dialog</h4>
+        <table class="table"><tbody>
+          <tr><td>宽度</td><td>添加 / 编辑联系人 400 · 添加 / 编辑服务器、重新授权 440 · 同名文件确认 480 · 确认类 420 · 目录浏览器 640 × 480</td></tr>
+          <tr><td>结构</td><td>标题区 20 24 0（16/600 + 关闭 x）；内容 16 24；按钮区 8 24 20，右对齐，间距 8</td></tr>
+          <tr><td>表单</td><td>标签 13/600，标签与输入 8，字段间 16；Input 高 32</td></tr>
+          <tr><td>提示 / 错误</td><td>12 muted / 12 danger；错误时输入框边框 danger</td></tr>
+          <tr><td>只读字段</td><td>muted.background + lock 14，文字 muted（重新授权的名称、地址、用户名）</td></tr>
+          <tr><td>说明框</td><td>muted.background，1 px border，内边距 12，13/20；密码说明 shield-check success；编辑服务器 info muted</td></tr>
+          <tr><td>同名文件列表</td><td>1 px border，table.background；行高 36，file 图标 16 + 文件名 14/600 单行省略 + 「— 上次发送于 / 上传于 {时间}」12 muted；最大高 144（4 行）后内部滚动</td></tr>
+          <tr><td>步骤</td><td>行高 28，图标 16：circle（等待）· loader-circle（进行中，primary）· circle-check（success）· circle-x（danger）</td></tr>
+          <tr><td>蒙层</td><td>overlay，从标题栏下方开始</td></tr>
+          <tr><td>表格</td><td>表头 32 table.head；行 36，table.row.border；选中 table.active.background</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">Toast · Notification</h4>
+        <table class="table"><tbody>
+          <tr><td>位置</td><td>窗口右上，距标题栏 12，距右 16；宽 320</td></tr>
+          <tr><td>样式</td><td>popover.background，1 px border，阴影；内边距 12 16</td></tr>
+          <tr><td>图标</td><td>成功 circle-check success；失败 circle-x danger</td></tr>
+          <tr><td>时长</td><td>成功 2 s 自动消失；失败 4 s 或手动关闭</td></tr>
+          <tr><td>换行</td><td>宽 320，文字可换至 2 行，图标与关闭按钮顶对齐</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">设置 · Setting</h4>
+        <table class="table"><tbody>
+          <tr><td>位置</td><td>右侧会话区，内容最大宽 640，内边距 24，分组间距 24</td></tr>
+          <tr><td>分组</td><td>标题 14/600，下方 8；卡片 popover.background，1 px border，内边距 16</td></tr>
+          <tr><td>开关</td><td>Switch 36 × 20，滑块 16；开 primary.background，关 switch.background</td></tr>
+          <tr><td>退出</td><td>secondary 按钮 + danger 文字，log-out 16；右侧 12 muted 说明</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">托盘 · Tray</h4>
+        <table class="table"><tbody>
+          <tr><td>图标</td><td>单色图形；未读加 #EC3013 圆点，四周挖出 1 px 间隙</td></tr>
+          <tr><td>明暗</td><td>Windows 读注册表 SystemUsesLightTheme：1 用 on-light，0 用 on-dark；Linux 默认 on-dark</td></tr>
+          <tr><td>尺寸</td><td>100% 16 · 125% 20 · 150% 24 · 200% 32</td></tr>
+          <tr><td>悬停提示</td><td>「Local Echo」/「Local Echo · {n} 条未读」</td></tr>
+          <tr><td>菜单</td><td>系统原生：「打开 Local Echo」（默认项）· 分隔线 ·「退出」</td></tr>
+        </tbody></table></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:16px"><h2 style="margin:0;font-size:28px;flex:1">主题色板</h2><a href="brand/local-echo-theme.json" style="font-weight:600">local-echo-theme.json</a></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;border-top:2px solid var(--color-divider);padding-top:24px">
+      <div style="display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--color-surface)">
+        <span style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">我方气泡</span>
+        <span style="font-size:15px">primary.background + primary.foreground</span>
+        <span style="font-size:13px">浅色 #DD2B0F / #FFFFFF · 深色 #DD2B0F / #FFFFFF</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--color-surface)">
+        <span style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">对方气泡</span>
+        <span style="font-size:15px">secondary.background + secondary.foreground</span>
+        <span style="font-size:13px">浅色 #E6E4E4 / #201E1D · 深色 #2E2B2B / #F3F2F2</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--color-surface)">
+        <span style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-700)">行内错误文字</span>
+        <span style="font-size:15px">danger.background</span>
+        <span style="font-size:13px">浅色 #AE1800 · 深色 #FF6B52（深色 danger 按钮配深色文字）</span>
+      </div>
+    </div>
+    <table class="table">
+      <thead><tr><th>Token</th><th>浅色</th><th>深色</th></tr></thead>
+      <tbody>
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="12">
+          <tr>
+            <td style="font-family:Consolas,'Cascadia Mono',monospace;font-size:13px">{{ r.key }}</td>
+            <td><span style="display:flex;align-items:center;gap:8px;font-family:Consolas,monospace;font-size:13px"><span style="width:28px;height:18px;flex:none;border:1px solid var(--color-divider);background:{{ r.light }}"></span>{{ r.light }}</span></td>
+            <td><span style="display:flex;align-items:center;gap:8px;font-family:Consolas,monospace;font-size:13px"><span style="width:28px;height:18px;flex:none;border:1px solid var(--color-divider);background:{{ r.dark }}"></span>{{ r.dark }}</span></td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { rows: [] };
+  componentDidMount() {
+    fetch('brand/local-echo-theme.json').then(r => r.json()).then(j => {
+      const L = j.themes.find(t => t.mode === 'light').colors, D = j.themes.find(t => t.mode === 'dark').colors;
+      this.setState({ rows: Object.keys(L).map(key => ({ key, light: L[key], dark: D[key] })) });
+    }).catch(e => console.warn('theme load failed', e));
+  }
+  renderVals() { return { rows: this.state.rows }; }
+}
+</script>
+</body>
+</html>
