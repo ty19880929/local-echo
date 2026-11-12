@@ -13,6 +13,37 @@ use gpui_kit::{
     *,
 };
 
+/// 底栏高度 token（v0.2 U3）：不含 1 px 上边框。侧边栏「设置」区、联系人输入区（单行时）、
+/// 服务器底栏都用它，三处上边框落在同一像素行。
+pub const FOOTER_H: f32 = 60.;
+
+/// 带 1 px 上边框的底栏：gpui 的尺寸含边框，所以总高是 `FOOTER_H + 1`。
+pub fn footer_height() -> Pixels {
+    px(FOOTER_H + 1.)
+}
+
+/// 表头（远程目录浏览器、本机 IP 共用）：高 32，table.head 底，12/600。左右内边距由调用方给出。
+pub fn table_head(cx: &App) -> Div {
+    h_flex()
+        .h(px(32.))
+        .flex_none()
+        .gap_3()
+        .bg(cx.theme().table_head)
+        .text_size(px(12.))
+        .font_semibold()
+        .text_color(cx.theme().table_head_foreground)
+}
+
+/// 表格行：高 36，table.row.border 行线，14 px。行线在上还是在下、左右内边距由调用方给出。
+pub fn table_row(cx: &App) -> Div {
+    h_flex()
+        .h(px(36.))
+        .flex_none()
+        .gap_3()
+        .border_color(cx.theme().table_row_border)
+        .text_size(px(14.))
+}
+
 /// 品牌图形（两点 + 相向弧线），按前景色着色。
 pub fn mark(size: f32) -> Svg {
     let path = if size <= 16. {

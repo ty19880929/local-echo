@@ -1,12 +1,16 @@
 //! 会话视图：联系人与服务器共用（设计 4.4、5.4、5.5、6；视觉见 docs/ui 03 / 04）。
 
-use std::{cell::RefCell, collections::HashMap, path::PathBuf};
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 
 use gpui_kit::{
     assets::IconName as Ic,
     base::SelectableText,
     component::{
-        ActiveTheme as _, Sizable as _, StyledExt as _, WindowExt as _,
+        ActiveTheme as _, Placement, Sizable as _, StyledExt as _, WindowExt as _,
         button::{Button, ButtonVariants as _},
         h_flex,
         input::{InputEvent, Textarea, TextareaState},
@@ -23,11 +27,16 @@ use super::{AppState, core, dialogs, format_size, kit, state};
 use crate::{
     data,
     db::{Contact, ContactKind, Message, MsgKind, SameName, Status, now_ms},
-    host, peer,
+    desktop, host, peer, rdp,
 };
 
 /// 同一发送方 5 分钟内的连续消息归为一组，共用一个表头（规格：组内间距 4，组间距 16）。
 const GROUP_GAP_MS: i64 = 5 * 60 * 1000;
+
+/// 侧边栏宽度（含右边框），用于由窗口宽度推算会话区宽度。
+const SIDEBAR_W: f32 = 260.;
+/// 会话区窄于此宽度时，服务器头部的「在终端中打开」「在远程桌面打开」收成图标按钮（v0.2 规格）。
+const HEADER_COMPACT_BELOW: f32 = 720.;
 
 pub struct ChatView {
     contact: Contact,
@@ -36,6 +45,8 @@ pub struct ChatView {
     composer: Option<Entity<TextareaState>>,
     /// 图片显示尺寸缓存（按消息 id），避免每帧读取文件头。
     image_sizes: RefCell<HashMap<String, (f32, f32)>>,
+    /// 「在远程桌面打开」正在探测端口 / 拉起客户端（v0.2 F1）。
+    rdp_busy: bool,
     _subscriptions: Vec<Subscription>,
 }
 
@@ -60,7 +71,14 @@ impl ChatView {
         scroller.update(cx, |s, cx| s.scroll_to_end(cx));
         cx.observe(&scroller, |_, _, cx| cx.notify()).detach();
 
-        let mut subscriptions = Vec::new();
+        // 窗口重新获得焦点时重新检查本地文件（v0.2 #13）：文件在外部被移动或删除后，
+        // 卡片换成「文件已被移动或删除」；图片会退化为文件卡片，高度变化，需要重新测量。
+        let mut subscriptions = vec![cx.observe_window_activation(window, |this, window, cx| {
+            if window.is_window_active() {
+                this.scroller.update(cx, |s, cx| s.remeasure(cx));
+                cx.notify();
+            }
+        })];
         let composer =
             (contact.kind == ContactKind::Peer).then(|| {
                 let composer = cx.new(|cx| {
@@ -86,6 +104,7 @@ impl ChatView {
             scroller,
             composer,
             image_sizes: RefCell::default(),
+            rdp_busy: false,
             _subscriptions: subscriptions,
         }
     }
@@ -121,6 +140,15 @@ impl ChatView {
         if let Some(index) = self.messages.iter().position(|m| m.id == id) {
             self.messages[index].status = status;
             // 完成 / 失败会改变卡片高度（操作行、进度条）。
+            self.scroller
+                .update(cx, |s, cx| _ = s.remeasure_items(index..index + 1, cx));
+            cx.notify();
+        }
+    }
+
+    /// 重新渲染并测量一条消息（本地文件状态变化时）。
+    fn refresh_message(&mut self, id: &str, cx: &mut Context<Self>) {
+        if let Some(index) = self.messages.iter().position(|m| m.id == id) {
             self.scroller
                 .update(cx, |s, cx| _ = s.remeasure_items(index..index + 1, cx));
             cx.notify();
@@ -412,11 +440,52 @@ impl ChatView {
         }
     }
 
+    /// 在远程桌面打开（v0.2 F1，设计 5.7）：探测 RDP 端口（最多 3 秒）→ 拉起本机客户端。
+    /// 成功时不提示（客户端窗口本身就是反馈）；端口不通、拉起失败弹错误 Toast；
+    /// Linux 找不到客户端时弹出安装提示对话框。
+    fn open_rdp(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        if self.rdp_busy {
+            return;
+        }
+        self.rdp_busy = true;
+        cx.notify();
+        let contact = self.contact.clone();
+        let task = core(cx).runtime.spawn(async move {
+            rdp::probe(&contact.host, contact.rdp_port).await?;
+            tokio::task::spawn_blocking(move || rdp::launch(&contact))
+                .await
+                .map_err(anyhow::Error::from)
+                .and_then(|r| r)
+                .map_err(|e| {
+                    if e.is::<rdp::NoClient>() {
+                        e
+                    } else {
+                        anyhow::anyhow!("无法启动远程桌面客户端：{e:#}")
+                    }
+                })
+        });
+        cx.spawn_in(window, async move |this, cx| {
+            let result = task.await.map_err(anyhow::Error::from).and_then(|r| r);
+            let _ = this.update_in(cx, |this, window, cx| {
+                this.rdp_busy = false;
+                cx.notify();
+                match result {
+                    Ok(()) => {}
+                    Err(e) if e.is::<rdp::NoClient>() => dialogs::rdp_missing(window, cx),
+                    Err(e) => window.push_notification(Notification::error(format!("{e:#}")), cx),
+                }
+            });
+        })
+        .detach();
+    }
+
     // ------------------------------------------------------------ 渲染
 
-    fn render_header(&self, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render_header(&self, window: &Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = cx.theme().clone();
         let c = &self.contact;
+        // 会话区 < 720（窗口 < 980）时，后两个按钮收成 32 × 32 图标按钮 + Tooltip（v0.2 规格）。
+        let compact = window.viewport_size().width.as_f32() - SIDEBAR_W < HEADER_COMPACT_BELOW;
         match c.kind {
             ContactKind::Peer => h_flex()
                 .h(px(56.))
@@ -506,12 +575,53 @@ impl ChatView {
                     Button::new("terminal")
                         .secondary()
                         .icon(kit::icon(Ic::SquareTerminal, 16.))
-                        .label("在终端中打开")
+                        .map(|b| {
+                            if compact {
+                                b.tooltip("在终端中打开")
+                                    .tooltip_placement(Placement::Bottom)
+                            } else {
+                                b.label("在终端中打开")
+                            }
+                        })
                         .on_click(
                             cx.listener(|this, _, window, cx| this.open_terminal(window, cx)),
                         ),
-                ),
+                )
+                .child(self.render_rdp_button(compact, cx)),
         }
+    }
+
+    /// 「在远程桌面打开」：常规 / 悬停 / 检测中（Spinner +「正在连接…」，整体 70% 不透明，
+    /// 不可点击，按钮保持原宽）。图标按钮只显示 Spinner，Tooltip 改为「正在连接…」。
+    fn render_rdp_button(&self, compact: bool, cx: &mut Context<Self>) -> impl IntoElement + use<> {
+        let busy = self.rdp_busy;
+        let tooltip = if busy {
+            "正在连接…".to_string()
+        } else {
+            format!(
+                "用远程桌面连接 {}:{}",
+                self.contact.host, self.contact.rdp_port
+            )
+        };
+        let button = Button::new("rdp")
+            .secondary()
+            .icon(kit::icon(Ic::Monitor, 16.))
+            .loading(busy)
+            .tooltip(tooltip)
+            .tooltip_placement(Placement::Bottom)
+            .when(!compact, |b| {
+                b.min_w(px(146.)).label(if busy {
+                    "正在连接…"
+                } else {
+                    "在远程桌面打开"
+                })
+            })
+            .on_click(cx.listener(|this, _, window, cx| this.open_rdp(window, cx)));
+        // 按钮加载态自带 80% 不透明，外层再乘 0.875 得到规格的 70%。
+        div()
+            .flex_none()
+            .when(busy, |d| d.opacity(0.875))
+            .child(button)
     }
 
     fn render_footer(&self, cx: &mut Context<Self>) -> AnyElement {
@@ -520,10 +630,13 @@ impl ChatView {
             Some(composer) => {
                 let paste_view = cx.entity().downgrade();
                 let empty = self.composer_empty(cx);
+                // 单行时高 60（v0.2 U3）= 上下内边距 12 + 36，输入多行时向上增高，此时不要求对齐。
+                // 内边距写成像素：rem 是 14 px，py_3 只有 10.5，底对齐时内容会偏下。
                 h_flex()
                     .flex_none()
+                    .min_h(kit::footer_height())
                     .px_4()
-                    .py_3()
+                    .py(px(12.))
                     .gap_2()
                     .items_end()
                     .border_t_1()
@@ -579,10 +692,12 @@ impl ChatView {
                     )
                     .into_any_element()
             }
+            // 服务器底栏高 60（v0.2 U3）：拖拽区与「上传文件」从 40 改为 36。
             None => h_flex()
                 .flex_none()
+                .h(kit::footer_height())
                 .px_4()
-                .py_3()
+                .py(px(12.))
                 .gap_3()
                 .border_t_1()
                 .border_color(theme.border)
@@ -590,7 +705,7 @@ impl ChatView {
                     h_flex()
                         .flex_1()
                         .min_w_0()
-                        .h(px(40.))
+                        .h(px(36.))
                         .px_3()
                         .gap_2()
                         .border_1()
@@ -608,7 +723,7 @@ impl ChatView {
                 .child(
                     Button::new("upload")
                         .primary()
-                        .h(px(40.))
+                        .h(px(36.))
                         .px_4()
                         .label("上传文件")
                         .on_click(cx.listener(|this, _, window, cx| this.pick_files(window, cx))),
@@ -735,6 +850,7 @@ fn render_body(
         {
             let path = local.unwrap();
             let open = path.clone();
+            let (view, id) = (view.clone(), msg.id.clone());
             let (w, h) = *this
                 .image_sizes
                 .borrow_mut()
@@ -745,7 +861,7 @@ fn render_body(
                 .cursor_pointer()
                 .border_1()
                 .border_color(cx.theme().border)
-                .on_click(move |_, _, cx| cx.open_with_system(&open))
+                .on_click(move |_, window, cx| open_local(&view, &id, &open, false, window, cx))
                 .child(img(path).w(px(w)).h(px(h)).object_fit(ObjectFit::Contain))
                 .into_any_element()
         }
@@ -951,18 +1067,24 @@ fn render_file(
                     .child(kit::progress_bar(percent, 4., cx)),
             )
         })
+        // 已完成：「打开」「打开文件夹」各占一半，文字居中，悬停该半块 secondary 底（v0.2 U1）。
         .when(msg.status == Status::Ok && existing.is_some(), |this| {
             let path = existing.clone().unwrap();
             let reveal = path.clone();
+            let (open_view, open_id) = (view.clone(), msg.id.clone());
+            let (reveal_view, reveal_id) = (view.clone(), msg.id.clone());
             let action = |id: String, label: &'static str| {
                 div()
                     .id(SharedString::from(id))
+                    .flex_1()
+                    .min_w_0()
                     .h(px(32.))
-                    .px_3()
                     .flex()
                     .items_center()
+                    .justify_center()
                     .cursor_pointer()
-                    .hover(|s| s.bg(theme.muted))
+                    .hover(|s| s.bg(theme.secondary))
+                    .active(|s| s.bg(theme.secondary))
                     .child(label)
             };
             this.child(
@@ -972,16 +1094,32 @@ fn render_file(
                     .text_size(px(13.))
                     .font_semibold()
                     .text_color(theme.link)
+                    .child(action(format!("open-{}", msg.id), "打开").on_click(
+                        move |_, window, cx| {
+                            open_local(&open_view, &open_id, &path, false, window, cx)
+                        },
+                    ))
                     .child(
-                        action(format!("open-{}", msg.id), "打开")
-                            .on_click(move |_, _, cx| cx.open_with_system(&path)),
-                    )
-                    .child(
-                        action(format!("reveal-{}", msg.id), "打开所在文件夹")
+                        action(format!("reveal-{}", msg.id), "打开文件夹")
                             .border_l_1()
                             .border_color(theme.border)
-                            .on_click(move |_, _, cx| cx.reveal_path(&reveal)),
+                            .on_click(move |_, window, cx| {
+                                open_local(&reveal_view, &reveal_id, &reveal, true, window, cx)
+                            }),
                     ),
+            )
+        })
+        // 传输成功但本地文件已被移动、改名或删除：在操作行的位置给出提示，与操作行等高（v0.2 #13）。
+        .when(msg.status == Status::Ok && existing.is_none(), |this| {
+            this.child(
+                div().border_t_1().border_color(theme.border).child(
+                    h_flex()
+                        .h(px(32.))
+                        .px_3()
+                        .text_size(px(13.))
+                        .text_color(theme.muted_foreground)
+                        .child("文件已被移动或删除"),
+                ),
             )
         })
         .when(msg.status == Status::Failed, |this| {
@@ -1020,8 +1158,29 @@ fn render_file(
         })
 }
 
+/// 卡片的「打开」「打开文件夹」与图片点击（v0.2 B1）：失败时弹出错误 Toast，并刷新该消息，
+/// 文件刚被删除时立即换成「文件已被移动或删除」。
+fn open_local(
+    view: &WeakEntity<ChatView>,
+    id: &str,
+    path: &Path,
+    reveal: bool,
+    window: &mut Window,
+    cx: &mut App,
+) {
+    let result = if reveal {
+        desktop::reveal(path, cx)
+    } else {
+        desktop::open(path, cx)
+    };
+    if let Err(e) = result {
+        window.push_notification(Notification::error(format!("{e:#}")), cx);
+        let _ = view.update(cx, |this, cx| this.refresh_message(id, cx));
+    }
+}
+
 impl Render for ChatView {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = cx.theme().clone();
         let view = cx.entity().downgrade();
         let auth_failed = state(cx).auth_failed.contains(&self.contact.id);
@@ -1055,7 +1214,7 @@ impl Render for ChatView {
             .on_drop(cx.listener(|this, paths: &ExternalPaths, window, cx| {
                 this.handle_paths(paths.paths().to_vec(), window, cx);
             }))
-            .child(self.render_header(cx))
+            .child(self.render_header(window, cx))
             .when(auth_failed, |this| {
                 this.child(
                     h_flex()

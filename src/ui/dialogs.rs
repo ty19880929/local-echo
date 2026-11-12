@@ -1,7 +1,7 @@
 //! 对话框（设计 4.3、5.2–5.4、6；视觉见 docs/ui 05–08）。
 //! 统一结构：标题区 20 24 0 · 内容区 16 24 · 按钮区 8 24 20（右对齐，间距 8）。
 
-use std::{collections::BTreeSet, rc::Rc};
+use std::{collections::BTreeSet, rc::Rc, time::Duration};
 
 use gpui_kit::{
     assets::IconName as Ic,
@@ -20,9 +20,9 @@ use gpui_kit::{
 use super::{AppState, AppView, core, format_full_time, format_size, kit, update_view_in};
 use crate::{
     data,
-    db::{Contact, ContactKind},
+    db::{Contact, ContactKind, DEFAULT_RDP_PORT},
     host::{self, Entry},
-    peer,
+    peer, rdp,
 };
 
 fn input(window: &mut Window, cx: &mut App, placeholder: &str, value: &str) -> Entity<InputState> {
@@ -126,6 +126,7 @@ impl ContactForm {
                                 user: String::new(),
                                 peer_id: Some(peer_id),
                                 remote_dir: String::new(),
+                                rdp_port: crate::db::DEFAULT_RDP_PORT,
                             };
                             Ok((db.insert_contact(&contact)?, false))
                         }
@@ -248,6 +249,9 @@ struct ServerForm {
     addr: Entity<InputState>,
     user: Entity<InputState>,
     password: Entity<InputState>,
+    /// 远程桌面端口（只在「编辑服务器」中出现，v0.2 F1）。
+    rdp_port: Entity<InputState>,
+    rdp_port_error: bool,
     /// 授权进行到第几步；`None` 表示尚未提交。
     step: Option<usize>,
     error: Option<SharedString>,
@@ -277,8 +281,16 @@ impl ServerForm {
 
         if let ServerMode::Edit(mut contact) = self.mode.clone() {
             // 编辑：直接保存，不做连接校验（设计 5.3）。
+            self.error = None;
+            let Some(rdp_port) = rdp::parse_port(&self.rdp_port.read(cx).value()) else {
+                self.rdp_port_error = true;
+                return cx.notify();
+            };
+            self.rdp_port_error = false;
+            // 远程桌面端口与 SSH 无关，修改它不需要丢弃缓存的 SSH 连接。
             let moved = contact.host != host || contact.port != port || contact.user != user;
             (contact.name, contact.host, contact.port, contact.user) = (name, host, port, user);
+            contact.rdp_port = rdp_port;
             if let Err(e) = core.db(|db| db.update_contact(&contact)) {
                 self.error = Some(format!("{e:#}").into());
                 return cx.notify();
@@ -326,6 +338,7 @@ impl ServerForm {
                             user: user.clone(),
                             peer_id: None,
                             remote_dir: home,
+                            rdp_port: crate::db::DEFAULT_RDP_PORT,
                         };
                         core.db(|db| db.insert_contact(&contact))
                     }
@@ -423,6 +436,31 @@ impl ServerForm {
     }
 }
 
+impl ServerForm {
+    /// 「远程桌面端口」+ muted「选填」；占位 3389，只能输入数字，保存时校验 1–65535。
+    fn render_rdp_port(&self, cx: &App) -> impl IntoElement + use<> {
+        let theme = cx.theme();
+        v_flex()
+            .gap_2()
+            .child(
+                h_flex()
+                    .gap_1()
+                    .text_size(px(13.))
+                    .child(div().font_semibold().child("远程桌面端口"))
+                    .child(div().text_color(theme.muted_foreground).child("选填")),
+            )
+            .child(
+                Input::new(&self.rdp_port)
+                    .when(self.rdp_port_error, |this| this.border_color(theme.danger)),
+            )
+            .child(if self.rdp_port_error {
+                kit::hint("请输入 1–65535 之间的端口", true, cx)
+            } else {
+                kit::hint("用于“在远程桌面打开”，默认 3389", false, cx)
+            })
+    }
+}
+
 impl Render for ServerForm {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = cx.theme().clone();
@@ -465,6 +503,9 @@ impl Render for ServerForm {
                     "用户名",
                     Input::new(&self.user).disabled(self.busy),
                 ))
+                .when(matches!(mode, ServerMode::Edit(_)), |this| {
+                    this.child(self.render_rdp_port(cx))
+                })
                 .when(matches!(mode, ServerMode::Add), |this| this.child(password)),
         };
         let validation = self.step.is_none().then(|| self.error.clone()).flatten();
@@ -534,12 +575,26 @@ pub fn server(mode: ServerMode, window: &mut Window, cx: &mut App) {
         contact.as_ref().map(|c| c.user.as_str()).unwrap_or(""),
     );
     let password = cx.new(|cx| InputState::new(window, cx).masked(true));
+    let rdp_port_value = contact
+        .as_ref()
+        .map(|c| c.rdp_port)
+        .filter(|p| *p != DEFAULT_RDP_PORT)
+        .map(|p| p.to_string())
+        .unwrap_or_default();
+    let rdp_port = cx.new(|cx| {
+        InputState::new(window, cx)
+            .placeholder(DEFAULT_RDP_PORT.to_string())
+            .default_value(rdp_port_value)
+            .validate(|text, _| text.len() <= 5 && text.chars().all(|c| c.is_ascii_digit()))
+    });
     let form = cx.new(|_| ServerForm {
         mode,
         name,
         addr,
         user,
         password,
+        rdp_port,
+        rdp_port_error: false,
         step: None,
         error: None,
         busy: false,
@@ -810,15 +865,11 @@ impl RemoteBrowser {
                                     .to_string()
                             })
                             .unwrap_or_default();
-                        h_flex()
+                        kit::table_row(cx)
                             .id(SharedString::from(format!("entry-{}", entry.name)))
                             .w_full()
-                            .h(px(36.))
                             .px_6()
-                            .gap_3()
                             .border_b_1()
-                            .border_color(theme.table_row_border)
-                            .text_size(px(14.))
                             .when(is_selected, |this| this.bg(theme.table_active))
                             .when(!is_selected && !dimmed, |this| {
                                 this.cursor_pointer().hover(|s| s.bg(theme.table_hover))
@@ -945,15 +996,8 @@ impl Render for RemoteBrowser {
                     .border_color(theme.border)
                     .bg(theme.table)
                     .child(
-                        h_flex()
-                            .h(px(32.))
-                            .flex_none()
+                        kit::table_head(cx)
                             .px_6()
-                            .gap_3()
-                            .bg(theme.table_head)
-                            .text_size(px(12.))
-                            .font_semibold()
-                            .text_color(theme.table_head_foreground)
                             .child(div().w(px(16.)))
                             .child(div().flex_1().child("名称"))
                             .child(div().w(px(88.)).text_right().child("大小"))
@@ -1033,4 +1077,133 @@ pub fn remote_browser(
             .on_ok(|_, _, _| false)
             .child(browser.clone())
     });
+}
+
+// ---------------------------------------------------------------- 未找到远程桌面客户端（v0.2 F1，480 宽，仅 Linux）
+
+const RDP_INSTALL: [(&str, &str); 3] = [
+    (
+        "Ubuntu / Debian",
+        "sudo apt install remmina remmina-plugin-rdp",
+    ),
+    ("Fedora", "sudo dnf install remmina remmina-plugins-rdp"),
+    ("Flatpak", "flatpak install flathub org.remmina.Remmina"),
+];
+
+struct RdpMissing {
+    /// 刚复制的命令，2 秒内显示对勾。
+    copied: Option<usize>,
+}
+
+impl RdpMissing {
+    fn copy(&mut self, index: usize, cx: &mut Context<Self>) {
+        cx.write_to_clipboard(ClipboardItem::new_string(RDP_INSTALL[index].1.to_string()));
+        self.copied = Some(index);
+        cx.notify();
+        cx.spawn(async move |this, cx| {
+            cx.background_executor().timer(Duration::from_secs(2)).await;
+            let _ = this.update(cx, |this, cx| {
+                if this.copied == Some(index) {
+                    this.copied = None;
+                    cx.notify();
+                }
+            });
+        })
+        .detach();
+    }
+}
+
+impl Render for RdpMissing {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let theme = cx.theme().clone();
+        let commands = RDP_INSTALL.iter().enumerate().map(|(i, (os, command))| {
+            let copied = self.copied == Some(i);
+            // 发行版名称单独放在命令上方，复制时只复制命令本身。
+            v_flex()
+                .gap_1()
+                .child(
+                    div()
+                        .text_size(px(12.))
+                        .line_height(px(18.))
+                        .text_color(theme.muted_foreground)
+                        .child(*os),
+                )
+                .child(
+                    h_flex()
+                        .h(px(36.))
+                        .border_1()
+                        .border_color(theme.border)
+                        .bg(theme.background)
+                        .child(
+                            div()
+                                .flex_1()
+                                .min_w_0()
+                                .px_3()
+                                .font_family(kit::mono(cx))
+                                .text_size(px(13.))
+                                .truncate()
+                                .child(*command),
+                        )
+                        .child(
+                            div()
+                                .id(("rdp-copy", i))
+                                .size(px(34.))
+                                .flex_none()
+                                .flex()
+                                .items_center()
+                                .justify_center()
+                                .border_l_1()
+                                .border_color(theme.border)
+                                .cursor_pointer()
+                                .when(copied, |this| this.bg(theme.secondary))
+                                .hover(|s| s.bg(theme.secondary))
+                                .text_color(if copied {
+                                    theme.success
+                                } else {
+                                    theme.muted_foreground
+                                })
+                                .child(kit::icon(if copied { Ic::Check } else { Ic::Copy }, 16.))
+                                .on_click(cx.listener(move |this, _, _, cx| this.copy(i, cx))),
+                        ),
+                )
+        });
+        v_flex()
+            .child(kit::dialog_header("未找到远程桌面客户端", cx))
+            .child(
+                v_flex()
+                    .px_6()
+                    .pt_3()
+                    .pb_4()
+                    .gap_4()
+                    .child(
+                        div()
+                            .text_size(px(14.))
+                            .line_height(px(22.))
+                            .text_color(theme.muted_foreground)
+                            .child("需要安装一个支持 RDP 的远程桌面客户端，推荐 Remmina。"),
+                    )
+                    .child(v_flex().gap_3().children(commands)),
+            )
+            .child(
+                kit::dialog_footer().pt_1().child(
+                    Button::new("rdp-ok")
+                        .primary()
+                        .min_w(px(72.))
+                        .label("知道了")
+                        .on_click(|_, window, cx| window.close_dialog(cx)),
+                ),
+            )
+    }
+}
+
+/// 只给安装提示，不退回到「在终端里运行 xfreerdp」（已确认 #5）。
+pub fn rdp_missing(window: &mut Window, cx: &mut App) {
+    let dialog = cx.new(|_| RdpMissing { copied: None });
+    open_entity_dialog(
+        dialog,
+        480.,
+        |_, window, cx| window.close_dialog(cx),
+        window,
+        cx,
+    );
 }

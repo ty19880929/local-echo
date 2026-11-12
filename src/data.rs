@@ -148,13 +148,18 @@ pub fn to_stored(root: &Path, path: &Path) -> String {
     }
 }
 
+/// 相对路径（统一按 `/` 存储）按段拼接，得到全部使用本机分隔符的路径。
+/// Windows 的 Shell 不接受混用 `/` 的路径，直接 `join` 会让「打开文件夹」失败（v0.2 B1）。
 pub fn resolve_stored(root: &Path, stored: &str) -> PathBuf {
     let path = Path::new(stored);
     if path.is_absolute() {
-        path.to_path_buf()
-    } else {
-        root.join(path)
+        return path.to_path_buf();
     }
+    let mut resolved = root.to_path_buf();
+    for part in stored.split('/').filter(|p| !p.is_empty()) {
+        resolved.push(part);
+    }
+    resolved
 }
 
 /// 收紧私钥权限，否则 OpenSSH 拒绝使用（设计 5.6）。
@@ -293,5 +298,27 @@ mod tests {
             resolve_stored(root, "files/a.png"),
             Path::new("/data/le/files/a.png")
         );
+    }
+
+    /// v0.2 B1：相对路径按段拼接，Windows 上结果不能混入 `/`。
+    #[test]
+    fn stored_paths_use_native_separators() {
+        let root = std::env::temp_dir().join("le data").join("echo");
+        let resolved = resolve_stored(&root, "files/报告 v2.pdf");
+        assert_eq!(resolved, root.join("files").join("报告 v2.pdf"));
+        assert_eq!(
+            resolve_stored(&root, "files/sub/a.txt"),
+            root.join("files").join("sub").join("a.txt")
+        );
+        #[cfg(windows)]
+        assert!(
+            !resolved.to_string_lossy().contains('/'),
+            "{}",
+            resolved.display()
+        );
+        // 往返：to_stored 存相对路径，resolve_stored 还原成同一个文件。
+        let stored = to_stored(&root, &resolved);
+        assert_eq!(stored, "files/报告 v2.pdf");
+        assert_eq!(resolve_stored(&root, &stored), resolved);
     }
 }

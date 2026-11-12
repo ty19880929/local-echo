@@ -18,7 +18,7 @@
       <span style="font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">实现规格 · gpui-kit</span>
       <h1 style="margin:0;font-size:48px">Local Echo 规范</h1>
     </div>
-    <nav style="display:flex;gap:24px;font-size:15px;font-weight:600"><a href="Local Echo 界面.dc.html">高保真界面</a><a href="Local Echo 品牌.dc.html">品牌与 Logo</a></nav>
+    <nav style="display:flex;gap:24px;font-size:15px;font-weight:600"><a href="Local Echo v0.2.dc.html">v0.2 变更</a><a href="Local Echo 界面.dc.html">高保真界面</a><a href="Local Echo 品牌.dc.html">品牌与 Logo</a></nav>
   </header>
 
   <section style="display:flex;flex-direction:column;gap:24px">
@@ -29,7 +29,7 @@
       <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">形态</h4><p style="margin:0;text-wrap:pretty">零圆角、1 px 边框、只在浮层上用阴影。气泡、卡片、按钮全部是直角矩形，靠色块与左右位置区分双方，和「工程感、安静」的品牌词一致。这一点与需求中的「小圆角」不同：圆角在主题中集中为 radius / radius.lg 两个值，改为 4 px 只需改这两处，设计稿其余部分不受影响。</p></div>
       <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">设置放在哪</h4><p style="margin:0;text-wrap:pretty">建议在右侧会话区内显示，侧边栏底部「设置」保持选中态。设置项只有两组，用对话框会显得空；放在会话区里，迁移确认和进度再用对话框叠加，层级清楚。</p></div>
       <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">关键交互取舍</h4><p style="margin:0;text-wrap:pretty">服务器会话没有输入框，底部只留拖拽区和「上传文件」，避免用户以为能执行命令。设备不匹配的失败提示直接给出「编辑」，一步打开编辑联系人；同名文件确认只列出有同名记录的文件，超过 4 行在列表内滚动。远程目录浏览器在「选择目录」模式下文件置灰不可选；「选择文件」模式靠行选中态多选，不额外加复选框列。传输中的卡片右上角给出取消（x），失败卡片把「重试」放在卡片底部操作行。</p></div>
-      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">文案建议</h4><p style="margin:0;text-wrap:pretty">多 IP 时，标题写「本机 IP（点击复制）」，每行附网卡名（以太网 / WLAN）。「下载文件」打开的浏览器标题用「下载文件」，「更改」打开的用「选择远程目录」。迁移确认补一句「切换后应用会自动重启」，让用户在点击前就知道。端口占用错误加标题「无法启动 Local Echo」。「退出 Local Echo」旁补一句「关闭窗口时 Local Echo 会继续在托盘中运行」，解释它和关闭窗口的区别。</p></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">文案建议</h4><p style="margin:0;text-wrap:pretty">本机 IP 在设置页第一组，用「网卡 / IP 地址 / 操作」表格列出，可收起（v0.2）。「下载文件」打开的浏览器标题用「下载文件」，「更改」打开的用「选择远程目录」。迁移确认补一句「切换后应用会自动重启」，让用户在点击前就知道。端口占用错误加标题「无法启动 Local Echo」。「退出 Local Echo」旁补一句「关闭窗口时 Local Echo 会继续在托盘中运行」，解释它和关闭窗口的区别。</p></div>
     </div>
   </section>
 
@@ -56,6 +56,7 @@
           <tr><td>阴影</td><td>仅浮层：Popover / Toast 0 3 10，Dialog 0 12 32</td></tr>
           <tr><td>动效</td><td>悬停、按下、浮层出现、进度变化，≤ 150 ms，ease-out</td></tr>
           <tr><td>窗口</td><td>默认 1000 × 680，最小 760 × 520；标题栏 36</td></tr>
+          <tr><td>底栏高度</td><td>footer.height = 60（不含上边框）：侧边栏「设置」区、联系人输入区（单行）、服务器底栏，三处上边框对齐</td></tr>
         </tbody>
       </table>
     </div>
@@ -67,7 +68,8 @@
       <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">侧边栏 · Sidebar</h4>
         <table class="table"><tbody>
           <tr><td>宽度</td><td>260，背景 sidebar.background，右边框 sidebar.border</td></tr>
-          <tr><td>本机 IP 区</td><td>内边距 12 16；13 px；底边框 1</td></tr>
+          <tr><td>顶部</td><td>直接从「联系人」组开始，列表区内边距 8（v0.2 删除本机 IP 区）</td></tr>
+          <tr><td>底部「设置」区</td><td>高 60，内边距 0 8，上边框 1；「设置」行 36 垂直居中</td></tr>
           <tr><td>组标题</td><td>高 32，12 px 600 muted.foreground；「+」ghost 图标按钮 24</td></tr>
           <tr><td>联系人条目</td><td>高 52，内边距 0 8，间距 12；头像 32（取昵称首字）；昵称 14/600，IP 12 muted</td></tr>
           <tr><td>服务器条目</td><td>高 52，同联系人；图标底 32（Lucide server 16）；名称 14/600，user@host 12 muted，端口 ≠ 22 时追加 :port；均单行省略</td></tr>
@@ -93,13 +95,14 @@
           <tr><td>主体</td><td>内边距 12，间距 12；类型图标底 40（muted.background，图标 20）</td></tr>
           <tr><td>文本</td><td>文件名 14/600 单行中间省略；远端路径 12 等宽 muted；大小 12 muted</td></tr>
           <tr><td>进度</td><td>高 4，轨道 primary 15%，填充 progress_bar.background；右上取消 x 16</td></tr>
-          <tr><td>已完成</td><td>底部操作行 高 32，上边框 1；「打开」「打开所在文件夹」13/600 link</td></tr>
+          <tr><td>已完成</td><td>底部操作行 高 32，上边框 1；「打开」「打开文件夹」各占 50%，文字居中，中间 1 px 竖线，13/600 link；悬停该半块 secondary.background</td></tr>
+          <tr><td>文件已不存在</td><td>替代操作行：高 32，上边框 1，内边距 0 12；「文件已被移动或删除」13 muted，左对齐，不可点击</td></tr>
           <tr><td>失败</td><td>操作行：circle-alert + 「发送 / 上传 / 下载失败 ·」danger + rotate-cw「重试」</td></tr>
           <tr><td>图标映射</td><td>file-text · file-archive · file-image · file-code · presentation · file</td></tr>
         </tbody></table></div>
       <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">输入区 · Textarea</h4>
         <table class="table"><tbody>
-          <tr><td>容器</td><td>内边距 12 16，间距 8，上边框 1，底对齐</td></tr>
+          <tr><td>容器</td><td>内边距 12 16，间距 8，上边框 1，底对齐；单行时高 60（footer.height）</td></tr>
           <tr><td>按钮</td><td>附件 paperclip：ghost 36 × 36，图标 18（无表情按钮）</td></tr>
           <tr><td>输入框</td><td>最小高 36，内边距 7 12，14 / 20；自动增高至 6 行（134）后滚动</td></tr>
           <tr><td>聚焦</td><td>边框 ring；caret 色 caret</td></tr>
@@ -108,15 +111,17 @@
         </tbody></table></div>
       <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">拖拽区 · 覆盖层</h4>
         <table class="table"><tbody>
-          <tr><td>服务器拖拽区</td><td>高 40，1 px 虚线 input.border，内边距 0 12；upload 16 + 13 px muted</td></tr>
-          <tr><td>上传按钮</td><td>primary，高 40，内边距 0 16</td></tr>
+          <tr><td>服务器底栏</td><td>高 60（footer.height），内边距 12 16，间距 12</td></tr>
+          <tr><td>服务器拖拽区</td><td>高 36，1 px 虚线 input.border，内边距 0 12；upload 16 + 13 px muted</td></tr>
+          <tr><td>上传按钮</td><td>primary，高 36，内边距 0 16</td></tr>
+          <tr><td>头部按钮</td><td>下载文件 · 在终端中打开 · 在远程桌面打开（monitor）；会话区 &lt; 720 时后两个变为 32 × 32 图标按钮 + Tooltip</td></tr>
           <tr><td>拖入覆盖层</td><td>覆盖会话区；底色 drop_target.background；内缩 12 的 1 px 虚线 drag_border</td></tr>
           <tr><td>覆盖层文字</td><td>upload 32（primary）+ 20 / 600</td></tr>
           <tr><td>密钥失效横幅</td><td>Alert：base.red.light 底，内边距 10 24；key-round 16 danger；右侧 primary「重新授权」</td></tr>
         </tbody></table></div>
       <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">对话框 · Dialog</h4>
         <table class="table"><tbody>
-          <tr><td>宽度</td><td>添加 / 编辑联系人 400 · 添加 / 编辑服务器、重新授权 440 · 同名文件确认 480 · 确认类 420 · 目录浏览器 640 × 480</td></tr>
+          <tr><td>宽度</td><td>添加 / 编辑联系人 400 · 添加 / 编辑服务器、重新授权 440 · 同名文件确认、未找到远程桌面客户端 480 · 确认类 420 · 目录浏览器 640 × 480</td></tr>
           <tr><td>结构</td><td>标题区 20 24 0（16/600 + 关闭 x）；内容 16 24；按钮区 8 24 20，右对齐，间距 8</td></tr>
           <tr><td>表单</td><td>标签 13/600，标签与输入 8，字段间 16；Input 高 32</td></tr>
           <tr><td>提示 / 错误</td><td>12 muted / 12 danger；错误时输入框边框 danger</td></tr>
@@ -129,16 +134,17 @@
         </tbody></table></div>
       <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">Toast · Notification</h4>
         <table class="table"><tbody>
-          <tr><td>位置</td><td>窗口右上，距标题栏 12，距右 16；宽 320</td></tr>
+          <tr><td>位置</td><td>窗口右上，距标题栏 12，距右 16；宽 320，超过 2 行时加宽到 400（最大）</td></tr>
           <tr><td>样式</td><td>popover.background，1 px border，阴影；内边距 12 16</td></tr>
           <tr><td>图标</td><td>成功 circle-check success；失败 circle-x danger</td></tr>
           <tr><td>时长</td><td>成功 2 s 自动消失；失败 4 s 或手动关闭</td></tr>
-          <tr><td>换行</td><td>宽 320，文字可换至 2 行，图标与关闭按钮顶对齐</td></tr>
+          <tr><td>换行</td><td>不截断，继续换行；图标与关闭按钮顶对齐；3 行及以上的失败 Toast 停留 8 s，悬停暂停计时</td></tr>
         </tbody></table></div>
       <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">设置 · Setting</h4>
         <table class="table"><tbody>
           <tr><td>位置</td><td>右侧会话区，内容最大宽 640，内边距 24，分组间距 24</td></tr>
           <tr><td>分组</td><td>标题 14/600，下方 8；卡片 popover.background，1 px border，内边距 16</td></tr>
+          <tr><td>本机 IP</td><td>第 1 组，可收起（标题行 28 整行可点 + chevron）；卡片内通栏 Table：网卡 / IP 地址（等宽）/ 操作（copy）；详见 v0.2 规格</td></tr>
           <tr><td>开关</td><td>Switch 36 × 20，滑块 16；开 primary.background，关 switch.background</td></tr>
           <tr><td>退出</td><td>secondary 按钮 + danger 文字，log-out 16；右侧 12 muted 说明</td></tr>
         </tbody></table></div>

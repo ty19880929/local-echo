@@ -453,7 +453,7 @@ fn linux_terminal() -> Option<(String, Vec<&'static str>)> {
 }
 
 #[cfg(not(windows))]
-fn which(program: &str) -> Option<std::path::PathBuf> {
+pub fn which(program: &str) -> Option<std::path::PathBuf> {
     std::env::var_os("PATH")?
         .to_str()?
         .split(':')
@@ -535,6 +535,7 @@ mod ssh_tests {
             user,
             peer_id: None,
             remote_dir: home.clone(),
+            rdp_port: crate::db::DEFAULT_RDP_PORT,
         };
         contact.id = core.db(|db| db.insert_contact(&contact)).unwrap();
 

@@ -5,7 +5,9 @@ mod data;
 mod db;
 mod desktop;
 mod host;
+mod net;
 mod peer;
+mod rdp;
 mod ui;
 
 use std::borrow::Cow;
@@ -38,7 +40,9 @@ gpui_kit::assets::icon_assets!(
         Paperclip,
         SendHorizontal,
         Download,
-        Upload
+        Upload,
+        Monitor,
+        WifiOff
     ]
 );
 

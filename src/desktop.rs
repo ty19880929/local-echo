@@ -1,6 +1,8 @@
-//! 托盘与开机自启（设计 8）。
+//! 托盘、开机自启（设计 8），以及用系统程序打开文件 / 文件夹（v0.2 B1）。
 
-use anyhow::Result;
+use std::path::Path;
+
+use anyhow::{Result, anyhow};
 use tokio::sync::mpsc::UnboundedSender;
 use tray_icon::{
     Icon, MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent,
@@ -210,4 +212,124 @@ pub fn set_autostart(enabled: bool) -> Result<()> {
         ),
     )?;
     Ok(())
+}
+
+// ---------------------------------------------------------------- 打开文件 / 文件夹（v0.2 B1）
+
+const MISSING: &str = "文件不存在，可能已被移动或删除";
+
+/// 用系统默认程序打开文件。
+pub fn open(path: &Path, cx: &gpui_kit::App) -> Result<()> {
+    if !path.exists() {
+        return Err(anyhow!(MISSING));
+    }
+    cx.open_with_system(path);
+    Ok(())
+}
+
+/// 在文件管理器中打开所在文件夹并选中该文件。
+pub fn reveal(path: &Path, cx: &gpui_kit::App) -> Result<()> {
+    if !path.exists() {
+        return Err(anyhow!(MISSING));
+    }
+    reveal_existing(path, cx)
+}
+
+/// Windows：gpui 的 `reveal_path` 失败时只写日志，用户看不到任何反馈（v0.2 B1），改为自己处理。
+/// 先用 `SHOpenFolderAndSelectItems`：该目录已有资源管理器窗口时也会在那个窗口里选中文件
+/// （`explorer /select,` 在这种情况下只激活窗口、不选中）。失败时退回 explorer，
+/// 两者都失败才报错。
+#[cfg(windows)]
+fn reveal_existing(path: &Path, _: &gpui_kit::App) -> Result<()> {
+    use std::os::windows::process::CommandExt;
+    if shell::open_folder_and_select(path).is_ok() {
+        return Ok(());
+    }
+    // explorer 解析参数的方式不标准，用 `raw_arg` 原样传入，避免自动加的引号出错；
+    // explorer 成功时也返回退出码 1，所以只把「进程启动失败」当作错误。
+    let explorer = std::env::var_os("SystemRoot")
+        .map(|root| Path::new(&root).join("explorer.exe"))
+        .unwrap_or_else(|| "explorer.exe".into());
+    let child = std::process::Command::new(explorer)
+        .raw_arg(format!("/select,\"{}\"", path.display()))
+        .spawn()
+        .map_err(|e| anyhow!("无法打开文件夹：{e}"))?;
+    reap(child);
+    Ok(())
+}
+
+/// shell32 的「打开所在文件夹并选中」。路径必须全部使用 `\`：Shell 的路径解析不接受 `/`（B1 的根因）。
+#[cfg(windows)]
+mod shell {
+    use std::{
+        ffi::c_void,
+        os::windows::ffi::OsStrExt as _,
+        path::Path,
+        ptr::{null, null_mut},
+    };
+
+    #[link(name = "shell32")]
+    unsafe extern "system" {
+        fn SHParseDisplayName(
+            name: *const u16,
+            bind_ctx: *mut c_void,
+            pidl: *mut *mut c_void,
+            sfgao_in: u32,
+            sfgao_out: *mut u32,
+        ) -> i32;
+        fn SHOpenFolderAndSelectItems(
+            pidl_folder: *const c_void,
+            count: u32,
+            items: *const *const c_void,
+            flags: u32,
+        ) -> i32;
+    }
+
+    #[link(name = "ole32")]
+    unsafe extern "system" {
+        fn CoInitializeEx(reserved: *mut c_void, coinit: u32) -> i32;
+        fn CoUninitialize();
+        fn CoTaskMemFree(pv: *mut c_void);
+    }
+
+    const COINIT_APARTMENTTHREADED: u32 = 0x2;
+    const COINIT_DISABLE_OLE1DDE: u32 = 0x4;
+
+    /// 成功返回 `Ok`，失败返回 HRESULT。`count = 0` 时 `pidl` 是要选中的那一项的完整 PIDL，
+    /// 系统打开它的父目录并选中它。
+    pub fn open_folder_and_select(path: &Path) -> Result<(), i32> {
+        let wide: Vec<u16> = path.as_os_str().encode_wide().chain([0]).collect();
+        // SAFETY: 参数都是有效指针或空指针；PIDL 由 SHParseDisplayName 分配，用完后释放；
+        // CoInitializeEx 成功（含 S_FALSE「已初始化」）时才配对调用 CoUninitialize。
+        unsafe {
+            let init = CoInitializeEx(
+                null_mut(),
+                COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE,
+            );
+            let mut pidl = null_mut();
+            let mut hr = SHParseDisplayName(wide.as_ptr(), null_mut(), &mut pidl, 0, null_mut());
+            if hr >= 0 {
+                hr = SHOpenFolderAndSelectItems(pidl, 0, null(), 0);
+                CoTaskMemFree(pidl);
+            }
+            if init >= 0 {
+                CoUninitialize();
+            }
+            if hr >= 0 { Ok(()) } else { Err(hr) }
+        }
+    }
+}
+
+/// Linux：gpui 的 `reveal_path`（文件管理器 D-Bus 接口，失败时退回 xdg-open）试用时表现正常。
+#[cfg(not(windows))]
+fn reveal_existing(path: &Path, cx: &gpui_kit::App) -> Result<()> {
+    cx.reveal_path(path);
+    Ok(())
+}
+
+/// 在后台等待拉起的子进程退出，避免留下僵尸进程。
+pub fn reap(mut child: std::process::Child) {
+    std::thread::spawn(move || {
+        let _ = child.wait();
+    });
 }

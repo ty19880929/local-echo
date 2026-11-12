@@ -1,6 +1,6 @@
 [package]
 name = "local-echo"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "Local Echo: LAN peer-to-peer chat, file transfer and SSH file exchange"
 license = "Proprietary"
@@ -25,7 +25,8 @@ anyhow = "1"
 [target.'cfg(windows)'.dependencies]
 winreg = "0.56"
 
-[target.'cfg(windows)'.build-dependencies]
+# 不区分平台：build.rs 按目标平台嵌入图标，Linux 上交叉编译 Windows 版时也需要（v0.2）。
+[build-dependencies]
 winresource = "0.1"
 
 [profile.dev.package."*"]
@@ -38,6 +39,8 @@ strip = true
 maintainer = "Local Echo"
 section = "net"
 depends = "$auto, libvulkan1, libwayland-client0, libfontconfig1, openssh-client"
+# 「在远程桌面打开」用到的客户端只作 Suggests（apt 默认不装），保持轻量（v0.2 F1）。
+suggests = "remmina, remmina-plugin-rdp | krdc | freerdp3-sdl"
 assets = [
   ["target/release/local-echo", "usr/bin/", "755"],
   ["assets/local-echo.desktop", "usr/share/applications/", "644"],
@@ -64,3 +67,6 @@ openssh-clients = "*"
 vulkan-loader = "*"
 libwayland-client = "*"
 fontconfig = "*"
+
+[package.metadata.generate-rpm.suggests]
+remmina = "*"

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-37784dd1-9c50-459d-b8de-89e4f5f0d6ce/styles.css">
+<script src="_ds/modernist-37784dd1-9c50-459d-b8de-89e4f5f0d6ce/_ds_bundle.js"></script>
+<style>body{margin:0;background:#f3f2f2}a{color:#ae1800}a:hover{color:#7c1405}</style>
+</helmet>
+<div style="padding:64px;display:flex;flex-direction:column;gap:64px;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);min-width:2200px">
+  <header style="display:flex;align-items:flex-end;gap:32px;padding-bottom:16px;border-bottom:2px solid var(--color-divider)">
+    <img src="brand/svg/mark-red.svg" alt="" style="width:56px;height:56px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+      <span style="font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">v0.2 增量修改 · 只含有改动的画面 · 浅色 / 深色</span>
+      <h1 style="margin:0;font-size:56px">Local Echo v0.2</h1>
+    </div>
+    <nav style="display:flex;gap:24px;font-size:16px;font-weight:600"><a href="Local Echo 界面.dc.html">全部界面</a><a href="Local Echo 规范.dc.html">组件规格</a></nav>
+  </header>
+
+  <section style="display:flex;flex-direction:column;gap:24px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">00 变更说明</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:40px;font-size:16px;line-height:1.65">
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0;font-size:18px">1 文件卡片操作行</h4><p style="margin:0;text-wrap:pretty">「打开」「打开文件夹」各占卡片一半，文字居中，悬停时整半块变色，点击区比原来按文字宽度排列大得多。「打开所在文件夹」改为「打开文件夹」。本地文件被移动、改名或删除后，原来直接隐藏操作行，用户不知道原因；现在在同一位置显示「文件已被移动或删除」，行高和上边框不变，卡片高度不跳。</p></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0;font-size:18px">2 本机 IP 移到设置页</h4><p style="margin:0;text-wrap:pretty">侧边栏删除本机 IP 区，直接从「联系人」开始，联系人列表多出约 44 px。顶部内边距保持 8，与条目左右内缩一致，不另加留白。设置页新增第一组「本机 IP」，用表格列出网卡、IP 和复制按钮；整行标题可收起，收起后仍显示第一个 IP 和总数。</p></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0;font-size:18px">3 底栏对齐</h4><p style="margin:0;text-wrap:pretty">新增底栏高度 token = 60（不含上边框）。侧边栏「设置」区 52 → 60；服务器底栏 64 → 60，拖拽区和「上传文件」40 → 36；联系人输入区单行时原本就是 60。三处上边框落在同一像素行，见 <a href="#3a">3-A</a> <a href="#3b">3-B</a>。</p></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0;font-size:18px">4 在远程桌面打开</h4><p style="margin:0;text-wrap:pretty">服务器头部新增第三个次要按钮，图标用 monitor。会话区小于 720 时，「在终端中打开」「在远程桌面打开」收成 32 × 32 图标按钮加 Tooltip，「下载文件」保留文字。新增检测中状态、两条错误 Toast、Linux 专用的「未找到远程桌面客户端」对话框，以及编辑服务器里的「远程桌面端口」。</p></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;font-size:15px;line-height:1.65;border-top:1px solid var(--color-divider);padding-top:24px">
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0;font-size:16px">颜色 token：不新增</h4><p style="margin:0;text-wrap:pretty">需求里卡片操作行的悬停写的是 muted 背景，但深色主题的 muted.background 与卡片的 popover.background 同为 #262424，悬停不可见。因此悬停改用已有的 secondary.background（浅 #E6E4E4 / 深 #2E2B2B），IP 标题行和复制按钮的悬停也用它；按钮悬停沿用 secondary.hover（浅 #DCD9D9 / 深 #383535）。稿中的蓝色 #0A84FF 只是标注，不进入主题。</p></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0;font-size:16px">文案建议（稿中仍按原文案绘制）</h4><p style="margin:0;text-wrap:pretty">端口不通的 Toast 在 400 宽下仍要 3 行，可拆为标题「无法连接 {host}:{port}」+ 正文，或在 Toast 内加「编辑服务器」链接，省去用户自己找入口。「远程桌面端口」标签后加了 muted 的「选填」。未找到客户端对话框里，发行版名称单独放在命令上方，复制时只复制命令本身。</p></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">01 文件卡片：已完成 · 文件已不存在</h2>
+    <div id="1a" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">1-A 联系人 320：收到已完成（悬停「打开文件夹」）· 发出已完成 · 收到后文件已不存在 · 浅色</span><dc-import name="LE Window" theme="light" scene="chat-files-done" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">1-A · 深色</span><dc-import name="LE Window" theme="dark" scene="chat-files-done" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="1b" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">1-B 服务器 340：上传已完成 · 下载已完成（悬停「打开」）· 下载后文件已不存在 · 浅色</span><dc-import name="LE Window" theme="light" scene="server-done" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">1-B · 深色</span><dc-import name="LE Window" theme="dark" scene="server-done" hint-size="1000px,680px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">02 本机 IP：侧边栏删除 · 设置页新增</h2>
+    <div id="2a" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-A 侧边栏从「联系人」开始 · 悬停「王晓明」 · 浅色</span><dc-import name="LE Window" theme="light" scene="home" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-A · 深色</span><dc-import name="LE Window" theme="dark" scene="home" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="2b" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-B 空分组引导 · 浅色</span><dc-import name="LE Window" theme="light" scene="empty" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-B · 深色</span><dc-import name="LE Window" theme="dark" scene="empty" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="2c" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-C 展开（默认）· 3 个 IP，含长网卡名 · 浅色</span><dc-import name="LE Window" theme="light" scene="settings" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-C · 深色</span><dc-import name="LE Window" theme="dark" scene="settings" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="2d" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-D 收起 · 标题行悬停 · 标注可点击区域 · 浅色</span><dc-import name="LE Window" theme="light" scene="settings-ip-collapsed" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-D · 深色</span><dc-import name="LE Window" theme="dark" scene="settings-ip-collapsed" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="2e" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-E 只有 1 个 IP · 展开 · 浅色</span><dc-import name="LE Window" theme="light" scene="settings-ip-single" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-E · 深色</span><dc-import name="LE Window" theme="dark" scene="settings-ip-single" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="2f" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-F 只有 1 个 IP · 收起：摘要直接显示该 IP · 浅色</span><dc-import name="LE Window" theme="light" scene="settings-ip-single-collapsed" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-F · 深色</span><dc-import name="LE Window" theme="dark" scene="settings-ip-single-collapsed" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="2g" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-G 未检测到网络 · 浅色</span><dc-import name="LE Window" theme="light" scene="settings-ip-none" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-G · 深色</span><dc-import name="LE Window" theme="dark" scene="settings-ip-none" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="2h" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-H 刚复制第 2 行 · 4 个 IP（Linux）· 浅色</span><dc-import name="LE Window" theme="light" scene="settings-ip-copied" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-H · 深色</span><dc-import name="LE Window" theme="dark" scene="settings-ip-copied" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="2i" style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-I 最小窗口 760 × 520 · 长网卡名中间省略 + 悬停 Tooltip · 浅色</span><dc-import name="LE Window" theme="light" scene="settings-ip-narrow" hint-size="760px,520px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">2-I · 深色</span><dc-import name="LE Window" theme="dark" scene="settings-ip-narrow" hint-size="760px,520px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">03 底栏对齐 · 底栏高度 60</h2>
+    <div id="3a" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">3-A 联系人会话 1000 × 680 · 参考线 · 浅色</span><dc-import name="LE Window" theme="light" scene="chat-text" guide="true" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">3-A · 深色</span><dc-import name="LE Window" theme="dark" scene="chat-text" guide="true" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="3b" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">3-B 服务器会话 1000 × 680 · 参考线 · 浅色</span><dc-import name="LE Window" theme="light" scene="server" guide="true" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">3-B · 深色</span><dc-import name="LE Window" theme="dark" scene="server" guide="true" hint-size="1000px,680px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:32px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">04 在远程桌面打开</h2>
+    <div id="4a" style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-A 会话区 740 · 三个文字按钮 · 悬停 + Tooltip · 浅色</span><dc-import name="LE Window" theme="light" scene="server-rdp-hover" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-B 会话区 500（窗口 760 × 520）· 收为图标按钮 · 悬停 + Tooltip · 浅色</span><dc-import name="LE Window" theme="light" scene="server-narrow" hint-size="760px,520px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-A · 深色</span><dc-import name="LE Window" theme="dark" scene="server-rdp-hover" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-B · 深色</span><dc-import name="LE Window" theme="dark" scene="server-narrow" hint-size="760px,520px"></dc-import></div>
+    </div>
+    <div id="4c" style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-C 740 · 检测中 + 密钥失效横幅 · 浅色</span><dc-import name="LE Window" theme="light" scene="server-checking" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-D 500 · 检测中（Tooltip 改为「正在连接…」）+ 密钥失效横幅 · 浅色</span><dc-import name="LE Window" theme="light" scene="server-narrow-checking" hint-size="760px,520px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-C · 深色</span><dc-import name="LE Window" theme="dark" scene="server-checking" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-D · 深色</span><dc-import name="LE Window" theme="dark" scene="server-narrow-checking" hint-size="760px,520px"></dc-import></div>
+    </div>
+    <div id="4e" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-E 错误 Toast：端口不通（加宽到 400，3 行）· 浅色</span><dc-import name="LE Window" theme="light" scene="server-rdp-port" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-E · 深色</span><dc-import name="LE Window" theme="dark" scene="server-rdp-port" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="4f" style="display:flex;gap:40px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-F 错误 Toast：无法启动客户端（320，2 行）· 浅色</span><dc-import name="LE Window" theme="light" scene="server-rdp-launch" hint-size="1000px,680px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-F · 深色</span><dc-import name="LE Window" theme="dark" scene="server-rdp-launch" hint-size="1000px,680px"></dc-import></div>
+    </div>
+    <div id="4g" style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-G 未找到远程桌面客户端 · 仅 Linux · 480 宽</span><dc-import name="LE Window" theme="light" scene="rdp-missing" hint-size="480px,420px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-H 编辑服务器 · 远程桌面端口（空，显示占位）</span><dc-import name="LE Window" theme="light" scene="edit-server" hint-size="440px,480px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-I 编辑服务器 · 端口错误</span><dc-import name="LE Window" theme="light" scene="edit-server-port-error" hint-size="440px,480px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-G · 深色</span><dc-import name="LE Window" theme="dark" scene="rdp-missing" hint-size="480px,420px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-H · 深色</span><dc-import name="LE Window" theme="dark" scene="edit-server" hint-size="440px,480px"></dc-import></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:15px;font-weight:600">4-I · 深色</span><dc-import name="LE Window" theme="dark" scene="edit-server-port-error" hint-size="440px,480px"></dc-import></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:24px">
+    <h2 style="margin:0;font-size:32px;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">05 规格标注</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px 48px;font-size:15px">
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">底栏 · footer.height = 60</h4>
+        <table class="table"><tbody>
+          <tr><td>token</td><td>60，不含 1 px 上边框（border）</td></tr>
+          <tr><td>侧边栏「设置」区</td><td>高 60，内边距 0 8；「设置」行 36 垂直居中（上下各 12）</td></tr>
+          <tr><td>联系人输入区</td><td>内边距 12 16；单行 12 + 36 + 12 = 60；多行向上增高至 6 行（输入框 134，底栏 158），此时不要求对齐</td></tr>
+          <tr><td>服务器底栏</td><td>内边距 12 16，间距 12；虚线拖拽区高 36；「上传文件」primary 高 36，内边距 0 16</td></tr>
+          <tr><td>对齐</td><td>三处上边框位于窗口内同一像素行；1000 × 680 时 y = 618</td></tr>
+          <tr><td>侧边栏顶部</td><td>删除本机 IP 区后，列表区内边距仍为 8，「联系人」组标题高 32</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">文件卡片操作行</h4>
+        <table class="table"><tbody>
+          <tr><td>布局</td><td>两个按钮各占 50%，文字水平居中；高 32；中间 1 px 竖线 border；上边框 1</td></tr>
+          <tr><td>文字</td><td>「打开」「打开文件夹」13 / 600 link</td></tr>
+          <tr><td>悬停</td><td>所在半块整块 secondary.background；按下同悬停</td></tr>
+          <tr><td>适用</td><td>联系人 320、服务器 340；发出、收到、上传、下载四种「已完成」</td></tr>
+          <tr><td>文件已不存在</td><td>替代操作行：高 32，上边框 1，内边距 0 12；「文件已被移动或删除」13 px muted.foreground 左对齐；不可点击、无悬停；卡片高度不变</td></tr>
+          <tr><td>检测时机（建议）</td><td>渲染卡片和窗口重新获得焦点时检查本地路径；点击「打开」时发现不存在，也立即切换为该状态</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">本机 IP · Collapsible + Table</h4>
+        <table class="table"><tbody>
+          <tr><td>位置</td><td>设置页第 1 组，在「数据目录」之前</td></tr>
+          <tr><td>标题行</td><td>高 28，margin 0 −8 / padding 0 8（文字仍与其他分组对齐）；14 / 600 + 右侧 chevron 16 muted；整行可点击；悬停 secondary.background；与卡片间距 4</td></tr>
+          <tr><td>展开 / 收起</td><td>默认展开；chevron-down / chevron-right；高度过渡 ≤ 150 ms</td></tr>
+          <tr><td>表格</td><td>卡片内通栏；表头 32 table.head，12 / 600 muted；行 36，行线 table.row.border；列内边距 0 16，列间距 12</td></tr>
+          <tr><td>列</td><td>网卡：弹性宽，14 px，单行中间省略，被省略时悬停 Tooltip 显示全名 · IP 地址：144，等宽 13 · 操作：40，居中 ghost 图标按钮 28（copy 16 muted）</td></tr>
+          <tr><td>复制</td><td>图标变 check success 2 s，按钮底 secondary；Toast「已复制 {ip}」</td></tr>
+          <tr><td>说明</td><td>卡片底部，上边框 1，内边距 12 16，12 / 18 muted</td></tr>
+          <tr><td>收起摘要</td><td>卡片内边距 16：{ip} 等宽 13 +「等 {n} 个」13 muted；1 个时只显示 {ip}；无网络时显示空状态文案</td></tr>
+          <tr><td>无网络</td><td>wifi-off 16 + 14 muted，高 52；不显示表头和说明</td></tr>
+          <tr><td>排序（建议）</td><td>有默认网关的网卡排第一，其次物理网卡，虚拟网卡（vEthernet、docker、br-）最后；收起摘要取第一行</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">服务器头部按钮 · 窄宽度规则</h4>
+        <table class="table"><tbody>
+          <tr><td>顺序</td><td>下载文件 · 在终端中打开 · 在远程桌面打开；secondary 高 32，内边距 0 12，图标 16 + 14 / 600；间距沿用头部 12</td></tr>
+          <tr><td>图标</td><td>monitor。screen-share 的箭头表示「把本机屏幕共享出去」，方向相反；monitor 表示「那台机器的桌面」，与 square-terminal 并列时一个是终端、一个是桌面</td></tr>
+          <tr><td>阈值</td><td>会话区 ≥ 720：三个都带文字。&lt; 720（窗口 &lt; 980）：后两个变为 32 × 32 图标按钮 + Tooltip，「下载文件」保留文字</td></tr>
+          <tr><td>计算</td><td>固定部分：内边距 48 + 头像 32 + 间距 24 = 104；文字按钮 104 + 132 + 146 + 间距 24 = 406；名称区至少 200 → 710，取 720。会话区 500 时：104 + 104 + 32 + 32 + 24 = 296，名称区剩 204</td></tr>
+          <tr><td>图标按钮尺寸</td><td>32 × 32，与头部文字按钮同高（需求示例为 36，36 会高出同行按钮）</td></tr>
+          <tr><td>状态</td><td>常规 secondary；悬停 secondary.hover；检测中：loader-circle 16 旋转 +「正在连接…」，整体 70% 不透明，不可点击，按钮保持原宽（min-width 146）；图标按钮只显示 Spinner，Tooltip 改为「正在连接…」</td></tr>
+          <tr><td>Tooltip</td><td>「用远程桌面连接 {host}:{port}」；按钮下方 8，与按钮右缘对齐；12 / 18，popover 底 + 阴影；浮在密钥失效横幅之上</td></tr>
+          <tr><td>流程</td><td>点击 → 检测端口，最多 3 s → 通：拉起客户端，按钮恢复 · 不通：错误 Toast · 拉起失败：错误 Toast · Linux 无客户端：对话框</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">Toast · 长文本</h4>
+        <table class="table"><tbody>
+          <tr><td>宽度</td><td>320；文字超过 2 行时加宽到 400（最大），继续换行，不截断</td></tr>
+          <tr><td>对齐</td><td>图标与关闭按钮与第一行顶对齐；行高 20</td></tr>
+          <tr><td>时长</td><td>成功 2 s；失败 4 s，3 行及以上 8 s；悬停时暂停计时</td></tr>
+          <tr><td>端口不通</td><td>400 宽，3 行（<a href="#4e">4-E</a>）</td></tr>
+          <tr><td>拉起失败</td><td>320 宽，2 行；{原因} 直接用系统错误信息（<a href="#4f">4-F</a>）</td></tr>
+        </tbody></table></div>
+      <div style="display:flex;flex-direction:column;gap:8px"><h4 style="margin:0">对话框</h4>
+        <table class="table"><tbody>
+          <tr><td>编辑服务器</td><td>「用户名」后新增「远程桌面端口」+ muted「选填」；Input 高 32，占位 3389；只接受数字，保存时校验 1–65535；提示 12 muted；错误：边框 danger + 12 danger；留空保存按 3389。「添加服务器」「重新授权」不变</td></tr>
+          <tr><td>未找到客户端</td><td>宽 480，仅 Linux；标题 16 / 600 + 关闭；说明 14 / 22 muted；每组：发行版 12 muted，下方 4 为命令框（高 36，1 px border，background 底，等宽 13 单行省略，右侧 34 复制按钮，左边框分隔）；组间 12；复制后 check success 2 s；「知道了」primary 右对齐</td></tr>
+        </tbody></table></div>
+    </div>
+  </section>
+</div>
+</x-dc>
+</body>
+</html>

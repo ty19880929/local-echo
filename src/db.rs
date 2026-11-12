@@ -40,6 +40,8 @@ pub struct Contact {
     pub peer_id: Option<String>,
     /// 服务器当前远程目录。
     pub remote_dir: String,
+    /// 服务器的远程桌面（RDP）端口，默认 3389；联系人不使用（v0.2 F1）。
+    pub rdp_port: u16,
 }
 
 #[derive(Clone, Debug)]
@@ -96,7 +98,13 @@ CREATE TABLE IF NOT EXISTS message (
 CREATE INDEX IF NOT EXISTS message_by_contact ON message (contact_id);
 ";
 
-const CONTACT_COLS: &str = "id, kind, name, host, port, user, peer_id, remote_dir";
+/// 数据库结构版本（`PRAGMA user_version`）：0 = v0.1，1 = v0.2（contact.rdp_port）。
+const SCHEMA_VERSION: i64 = 1;
+
+/// 远程桌面默认端口。
+pub const DEFAULT_RDP_PORT: u16 = 3389;
+
+const CONTACT_COLS: &str = "id, kind, name, host, port, user, peer_id, remote_dir, rdp_port";
 const MESSAGE_COLS: &str =
     "id, contact_id, outgoing, kind, body, path, remote_path, size, status, ts";
 
@@ -108,6 +116,7 @@ impl Db {
     pub fn open(path: &Path) -> Result<Self> {
         let conn = Connection::open(path)?;
         conn.execute_batch(SCHEMA)?;
+        upgrade(&conn)?;
         // 上次异常退出时未完成的传输标为失败（设计 3.2）。
         conn.execute("UPDATE message SET status = 2 WHERE status = 0", [])?;
         Ok(Self(conn))
@@ -138,8 +147,8 @@ impl Db {
 
     pub fn insert_contact(&self, c: &Contact) -> Result<i64> {
         self.0.execute(
-            "INSERT INTO contact (kind, name, host, port, user, peer_id, remote_dir) \
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            "INSERT INTO contact (kind, name, host, port, user, peer_id, remote_dir, rdp_port) \
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
             params![
                 c.kind as i64,
                 c.name,
@@ -147,7 +156,8 @@ impl Db {
                 c.port,
                 c.user,
                 c.peer_id,
-                c.remote_dir
+                c.remote_dir,
+                c.rdp_port
             ],
         )?;
         Ok(self.0.last_insert_rowid())
@@ -155,8 +165,17 @@ impl Db {
 
     pub fn update_contact(&self, c: &Contact) -> Result<()> {
         self.0.execute(
-            "UPDATE contact SET name = ?2, host = ?3, port = ?4, user = ?5, remote_dir = ?6 WHERE id = ?1",
-            params![c.id, c.name, c.host, c.port, c.user, c.remote_dir],
+            "UPDATE contact SET name = ?2, host = ?3, port = ?4, user = ?5, remote_dir = ?6, \
+             rdp_port = ?7 WHERE id = ?1",
+            params![
+                c.id,
+                c.name,
+                c.host,
+                c.port,
+                c.user,
+                c.remote_dir,
+                c.rdp_port
+            ],
         )?;
         Ok(())
     }
@@ -236,6 +255,24 @@ impl Db {
     }
 }
 
+/// 按 `user_version` 逐级升级表结构；新库先按 v0.1 结构建表，再走同一条升级路径。
+/// 只做加列：v0.1 的 SELECT / INSERT 都写了明确的列名，打开升级后的库不受影响。
+fn upgrade(conn: &Connection) -> Result<()> {
+    let version: i64 = conn.pragma_query_value(None, "user_version", |r| r.get(0))?;
+    if version < 1 {
+        let has_rdp_port = conn
+            .prepare("SELECT 1 FROM pragma_table_info('contact') WHERE name = 'rdp_port'")?
+            .exists([])?;
+        if !has_rdp_port {
+            conn.execute_batch(&format!(
+                "ALTER TABLE contact ADD COLUMN rdp_port INTEGER NOT NULL DEFAULT {DEFAULT_RDP_PORT}"
+            ))?;
+        }
+        conn.pragma_update(None, "user_version", SCHEMA_VERSION)?;
+    }
+    Ok(())
+}
+
 fn contact_from_row(row: &Row) -> rusqlite::Result<Contact> {
     Ok(Contact {
         id: row.get(0)?,
@@ -250,6 +287,7 @@ fn contact_from_row(row: &Row) -> rusqlite::Result<Contact> {
         user: row.get(5)?,
         peer_id: row.get(6)?,
         remote_dir: row.get(7)?,
+        rdp_port: row.get(8)?,
     })
 }
 
@@ -294,6 +332,7 @@ mod tests {
             user: String::new(),
             peer_id: Some(peer_id.into()),
             remote_dir: String::new(),
+            rdp_port: DEFAULT_RDP_PORT,
         }
     }
 
@@ -346,5 +385,76 @@ mod tests {
             .unwrap();
         db.delete_contact(id).unwrap();
         assert!(db.message("1").unwrap().is_none());
+    }
+
+    #[test]
+    fn upgrades_v01_schema() {
+        let path = std::env::temp_dir().join(format!("le-db-{}.db", uuid::Uuid::new_v4()));
+        {
+            // v0.1 的表结构与写入方式（没有 rdp_port 列，user_version = 0）。
+            let conn = Connection::open(&path).unwrap();
+            conn.execute_batch(SCHEMA).unwrap();
+            conn.execute(
+                "INSERT INTO contact (kind, name, host, port, user, peer_id, remote_dir) \
+                 VALUES (1, 'srv', '10.0.0.5', 22, 'root', NULL, '/root')",
+                [],
+            )
+            .unwrap();
+        }
+        for _ in 0..2 {
+            // 第二次打开时已是 v1，不能重复加列。
+            let db = Db::open(&path).unwrap();
+            let version: i64 =
+                db.0.pragma_query_value(None, "user_version", |r| r.get(0))
+                    .unwrap();
+            assert_eq!(version, SCHEMA_VERSION);
+            let mut host = db.contacts().unwrap().remove(0);
+            assert_eq!(host.rdp_port, DEFAULT_RDP_PORT);
+            host.rdp_port = 13389;
+            db.update_contact(&host).unwrap();
+            assert_eq!(db.contact(host.id).unwrap().unwrap().rdp_port, 13389);
+            host.rdp_port = DEFAULT_RDP_PORT;
+            db.update_contact(&host).unwrap();
+        }
+        {
+            // v0.1 程序按明确列名读写升级后的库（降级、换电脑迁移）。
+            let conn = Connection::open(&path).unwrap();
+            let name: String = conn
+                .query_row(
+                    "SELECT id, kind, name, host, port, user, peer_id, remote_dir FROM contact",
+                    [],
+                    |r| r.get(2),
+                )
+                .unwrap();
+            assert_eq!(name, "srv");
+            conn.execute(
+                "INSERT INTO contact (kind, name, host, port, user, peer_id, remote_dir) \
+                 VALUES (1, 'b', '10.0.0.6', 22, 'u', NULL, '/')",
+                [],
+            )
+            .unwrap();
+        }
+        let db = Db::open(&path).unwrap();
+        assert!(
+            db.contacts()
+                .unwrap()
+                .iter()
+                .all(|c| c.rdp_port == DEFAULT_RDP_PORT)
+        );
+        drop(db);
+        for suffix in ["", "-wal", "-shm"] {
+            let _ = std::fs::remove_file(format!("{}{suffix}", path.display()));
+        }
+    }
+
+    #[test]
+    fn new_database_is_current() {
+        let db = temp_db();
+        let version: i64 =
+            db.0.pragma_query_value(None, "user_version", |r| r.get(0))
+                .unwrap();
+        assert_eq!(version, SCHEMA_VERSION);
+        let id = db.insert_contact(&peer("a", "dev-1")).unwrap();
+        assert_eq!(db.contact(id).unwrap().unwrap().rdp_port, DEFAULT_RDP_PORT);
     }
 }

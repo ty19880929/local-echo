@@ -218,6 +218,7 @@ fn touch_peer(core: &Core, peer_id: &str, user: Option<&str>, ip: IpAddr) -> Res
                 user: String::new(),
                 peer_id: Some(peer_id.to_string()),
                 remote_dir: String::new(),
+                rdp_port: crate::db::DEFAULT_RDP_PORT,
             };
             c.id = db.insert_contact(&c)?;
             Ok((c, true))
@@ -461,6 +462,7 @@ mod tests {
             user: String::new(),
             peer_id: Some(b_id),
             remote_dir: String::new(),
+            rdp_port: crate::db::DEFAULT_RDP_PORT,
         };
         contact.id = a.db(|db| db.insert_contact(&contact)).unwrap();
 

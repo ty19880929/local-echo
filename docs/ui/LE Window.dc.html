@@ -27,19 +27,6 @@
 </div>
 <div style="flex:1;display:flex;min-height:0">
   <div style="width:260px;flex:none;display:flex;flex-direction:column;background:var(--sb);border-right:1px solid var(--bd)">
-    <sc-if value="{{ s.singleIp }}" hint-placeholder-val="{{ true }}">
-      <div style="padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;font-size:13px">
-        <span style="color:var(--mfg)">本机 IP：</span><span style="font-weight:600;flex:1">192.168.1.10</span>
-        <span style="width:14px;height:14px;display:flex;color:var(--mfg)">{{ i.copy }}</span>
-      </div>
-    </sc-if>
-    <sc-if value="{{ s.multiIp }}">
-      <div style="padding:8px 8px;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;gap:2px;font-size:13px">
-        <div style="padding:2px 8px;font-size:12px;color:var(--mfg)">本机 IP（点击复制）</div>
-        <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--sbh)"><span style="font-weight:600;flex:1">192.168.1.10</span><span style="font-size:12px;color:var(--mfg)">以太网</span><span style="width:14px;height:14px;display:flex;color:var(--ok)">{{ i.check }}</span></div>
-        <div style="display:flex;align-items:center;gap:8px;padding:6px 8px"><span style="font-weight:600;flex:1">10.8.0.3</span><span style="font-size:12px;color:var(--mfg)">WLAN</span><span style="width:14px;height:14px;display:flex;color:var(--mfg)">{{ i.copy }}</span></div>
-      </div>
-    </sc-if>
     <div style="flex:1;min-height:0;overflow:hidden;padding:8px;display:flex;flex-direction:column">
       <div style="height:32px;display:flex;align-items:center;padding:0 4px 0 8px;font-size:12px;font-weight:600;color:var(--mfg)">
         <span style="flex:1">联系人</span>
@@ -90,7 +77,7 @@
         </div>
       </sc-if>
     </div>
-    <div style="padding:8px;border-top:1px solid var(--bd)">
+    <div style="height:60px;box-sizing:content-box;flex:none;padding:0 8px;display:flex;flex-direction:column;justify-content:center;border-top:1px solid var(--bd)">
       <div style="height:36px;display:flex;align-items:center;gap:12px;padding:0 8px;font-size:14px;background:{{ ib.set }}">
         <span style="width:16px;height:16px;display:flex">{{ i.settings }}</span><span>设置</span>
       </div>
@@ -191,8 +178,8 @@
                   <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600;white-space:nowrap">季度汇报-终版-v3-修…-2026-11.pptx</span><span style="font-size:12px;color:var(--mfg)">18.4 MB</span></div>
                 </div>
                 <div style="display:flex;border-top:1px solid var(--bd);font-size:13px;font-weight:600;color:var(--link)">
-                  <div style="height:32px;padding:0 12px;display:flex;align-items:center">打开</div>
-                  <div style="height:32px;padding:0 12px;display:flex;align-items:center;border-left:1px solid var(--bd)">打开所在文件夹</div>
+                  <div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--sec)">打开</div>
+                  <div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--bd);cursor:pointer" style-hover="background:var(--sec)">打开文件夹</div>
                 </div>
               </div>
             </div>
@@ -232,6 +219,11 @@
             </div>
           </div>
         </sc-if>
+        <sc-if value="{{ s.chatD }}">
+          <div style="display:flex;gap:8px;align-items:flex-start"><div style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--av);font-size:14px;font-weight:600">老</div><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start"><span style="font-size:12px;color:var(--mfg)">老李 · 10:31</span><div style="width:320px;background:var(--pop);border:1px solid var(--bd);display:flex;flex-direction:column"><div style="display:flex;gap:12px;padding:12px;align-items:center"><div style="width:40px;height:40px;flex:none;background:var(--mut);display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;display:flex">{{ i.pres }}</span></div><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">季度汇报-终版-v3-修…-2026-11.pptx</span><span style="font-size:12px;color:var(--mfg)">18.4 MB</span></div></div><div style="display:flex;border-top:1px solid var(--bd);font-size:13px;font-weight:600;color:var(--link)"><div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center">打开</div><div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--bd);background:var(--sec)">打开文件夹</div></div></div></div></div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end"><span style="font-size:12px;color:var(--mfg)">10:33</span><div style="width:320px;background:var(--pop);border:1px solid var(--bd);display:flex;flex-direction:column"><div style="display:flex;gap:12px;padding:12px;align-items:center"><div style="width:40px;height:40px;flex:none;background:var(--mut);display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;display:flex">{{ i.file }}</span></div><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Local-Echo-Setup-0.4.2-x64.msi</span><span style="font-size:12px;color:var(--mfg)">36.2 MB</span></div></div><div style="display:flex;border-top:1px solid var(--bd);font-size:13px;font-weight:600;color:var(--link)"><div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center">打开</div><div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--bd)">打开文件夹</div></div></div></div>
+          <div style="display:flex;gap:8px;align-items:flex-start"><div style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--av);font-size:14px;font-weight:600">老</div><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start"><span style="font-size:12px;color:var(--mfg)">老李 · 10:34</span><div style="width:320px;background:var(--pop);border:1px solid var(--bd);display:flex;flex-direction:column"><div style="display:flex;gap:12px;padding:12px;align-items:center"><div style="width:40px;height:40px;flex:none;background:var(--mut);display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;display:flex">{{ i.fileArchive }}</span></div><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">logs-2026-11-09.tar.gz</span><span style="font-size:12px;color:var(--mfg)">12.9 MB</span></div></div><div style="border-top:1px solid var(--bd)"><div style="height:32px;display:flex;align-items:center;padding:0 12px;font-size:13px;color:var(--mfg)">文件已被移动或删除</div></div></div></div></div>
+        </sc-if>
         <div style="position:absolute;right:4px;top:24px;width:4px;height:120px;background:var(--thumb)"></div>
         <sc-if value="{{ s.newMsg }}">
           <div style="position:absolute;left:50%;bottom:16px;transform:translateX(-50%);height:32px;padding:0 12px;display:flex;align-items:center;gap:6px;background:var(--pop);border:1px solid var(--bd);box-shadow:var(--shadow);font-size:13px;font-weight:600"><span style="width:14px;height:14px;display:flex">{{ i.arrowDown }}</span>新消息</div>
@@ -267,9 +259,28 @@
           <span style="font-size:12px;line-height:18px;color:var(--mfg);display:flex;gap:8px;white-space:nowrap;min-width:0"><span style="overflow:hidden;text-overflow:ellipsis">远程目录：/home/root/deploy</span><span style="flex:none;color:var(--link);font-weight:600;text-decoration:underline;text-underline-offset:3px">更改</span></span>
         </div>
         <div style="height:32px;padding:0 12px;display:flex;align-items:center;gap:8px;background:var(--sec);font-size:14px;font-weight:600;white-space:nowrap"><span style="width:16px;height:16px;display:flex">{{ i.download }}</span>下载文件</div>
-        <div style="height:32px;padding:0 12px;display:flex;align-items:center;gap:8px;background:var(--sec);font-size:14px;font-weight:600;white-space:nowrap"><span style="width:16px;height:16px;display:flex">{{ i.terminal }}</span>在终端中打开</div>
+        <sc-if value="{{ s.hWide }}" hint-placeholder-val="{{ true }}">
+          <div style="height:32px;padding:0 12px;display:flex;align-items:center;gap:8px;background:var(--sec);font-size:14px;font-weight:600;white-space:nowrap"><span style="width:16px;height:16px;display:flex">{{ i.terminal }}</span>在终端中打开</div>
+          <div style="position:relative;height:32px;min-width:146px;padding:0 12px;display:flex;align-items:center;gap:8px;background:{{ rdpBg }};font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer" style-hover="background:var(--av)">
+            <div style="display:flex;align-items:center;gap:8px;opacity:{{ rdpOp }}">
+              <sc-if value="{{ s.rdpIdle }}" hint-placeholder-val="{{ true }}"><span style="width:16px;height:16px;display:flex">{{ i.monitor }}</span>在远程桌面打开</sc-if>
+              <sc-if value="{{ s.rdpBusy }}"><span style="width:16px;height:16px;display:flex">{{ i.loader }}</span>正在连接…</sc-if>
+            </div>
+            <sc-if value="{{ s.rdpTip }}"><div style="position:absolute;right:0;top:40px;z-index:3;padding:4px 8px;background:var(--pop);border:1px solid var(--bd);box-shadow:var(--shadow);color:var(--fg);font-size:12px;font-weight:400;line-height:18px;white-space:nowrap">{{ tipText }}</div></sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{ s.hCompact }}">
+          <div style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--sec)"><span style="width:16px;height:16px;display:flex">{{ i.terminal }}</span></div>
+          <div style="position:relative;width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;background:{{ rdpBg }};cursor:pointer" style-hover="background:var(--av)">
+            <div style="display:flex;opacity:{{ rdpOp }}">
+              <sc-if value="{{ s.rdpIdle }}" hint-placeholder-val="{{ true }}"><span style="width:16px;height:16px;display:flex">{{ i.monitor }}</span></sc-if>
+              <sc-if value="{{ s.rdpBusy }}"><span style="width:16px;height:16px;display:flex">{{ i.loader }}</span></sc-if>
+            </div>
+            <sc-if value="{{ s.rdpTip }}"><div style="position:absolute;right:0;top:40px;z-index:3;padding:4px 8px;background:var(--pop);border:1px solid var(--bd);box-shadow:var(--shadow);color:var(--fg);font-size:12px;font-weight:400;line-height:18px;white-space:nowrap">{{ tipText }}</div></sc-if>
+          </div>
+        </sc-if>
       </div>
-      <sc-if value="{{ s.authErr }}">
+      <sc-if value="{{ s.banner }}">
         <div style="flex:none;display:flex;align-items:center;gap:12px;padding:10px 24px;background:var(--redl);border-bottom:1px solid var(--bd)">
           <span style="width:16px;height:16px;display:flex;color:var(--dng)">{{ i.key }}</span>
           <span style="flex:1;font-size:14px">无法登录该服务器，访问密钥可能已失效</span>
@@ -277,6 +288,11 @@
         </div>
       </sc-if>
       <div style="flex:1;min-height:0;overflow:hidden;position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;padding:16px 24px">
+        <sc-if value="{{ s.srvDone }}">
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end"><span style="font-size:12px;color:var(--mfg)">上传 · 09:40</span><div style="width:340px;background:var(--pop);border:1px solid var(--bd);display:flex;flex-direction:column"><div style="display:flex;gap:12px;padding:12px;align-items:center"><div style="width:40px;height:40px;flex:none;background:var(--mut);display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;display:flex">{{ i.fileArchive }}</span></div><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">release-2.3.1.tar.gz</span><span style="font-size:12px;color:var(--mfg);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">/home/root/deploy/release-2.3.1.tar.gz</span><span style="font-size:12px;color:var(--mfg)">128.6 MB</span></div></div><div style="display:flex;border-top:1px solid var(--bd);font-size:13px;font-weight:600;color:var(--link)"><div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center">打开</div><div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--bd)">打开文件夹</div></div></div></div>
+          <div style="display:flex;gap:8px;align-items:flex-start"><div style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--av);font-size:14px;font-weight:600"><span style="width:16px;height:16px;display:flex">{{ i.server }}</span></div><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start"><span style="font-size:12px;color:var(--mfg)">下载 · 09:52</span><div style="width:340px;background:var(--pop);border:1px solid var(--bd);display:flex;flex-direction:column"><div style="display:flex;gap:12px;padding:12px;align-items:center"><div style="width:40px;height:40px;flex:none;background:var(--mut);display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;display:flex">{{ i.fileCode }}</span></div><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">nginx.conf</span><span style="font-size:12px;color:var(--mfg);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">/etc/nginx/nginx.conf</span><span style="font-size:12px;color:var(--mfg)">4.2 KB</span></div></div><div style="display:flex;border-top:1px solid var(--bd);font-size:13px;font-weight:600;color:var(--link)"><div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center;background:var(--sec)">打开</div><div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--bd)">打开文件夹</div></div></div></div></div>
+          <div style="display:flex;gap:8px;align-items:flex-start"><div style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--av);font-size:14px;font-weight:600"><span style="width:16px;height:16px;display:flex">{{ i.server }}</span></div><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start"><span style="font-size:12px;color:var(--mfg)">下载 · 10:06</span><div style="width:340px;background:var(--pop);border:1px solid var(--bd);display:flex;flex-direction:column"><div style="display:flex;gap:12px;padding:12px;align-items:center"><div style="width:40px;height:40px;flex:none;background:var(--mut);display:flex;align-items:center;justify-content:center"><span style="width:20px;height:20px;display:flex">{{ i.fileText }}</span></div><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">app-2026-11-08.log</span><span style="font-size:12px;color:var(--mfg);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">/var/log/app/app-2026-11-08.log</span><span style="font-size:12px;color:var(--mfg)">188.2 MB</span></div></div><div style="border-top:1px solid var(--bd)"><div style="height:32px;display:flex;align-items:center;padding:0 12px;font-size:13px;color:var(--mfg)">文件已被移动或删除</div></div></div></div></div>
+        </sc-if>
         <sc-if value="{{ s.srvOk }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
             <span style="font-size:12px;color:var(--mfg)">上传 · 09:40</span>
@@ -286,8 +302,8 @@
                 <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600">release-2.3.1.tar.gz</span><span style="font-size:12px;color:var(--mfg);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">/home/root/deploy/release-2.3.1.tar.gz</span><span style="font-size:12px;color:var(--mfg)">128.6 MB</span></div>
               </div>
               <div style="display:flex;border-top:1px solid var(--bd);font-size:13px;font-weight:600;color:var(--link)">
-                <div style="height:32px;padding:0 12px;display:flex;align-items:center">打开</div>
-                <div style="height:32px;padding:0 12px;display:flex;align-items:center;border-left:1px solid var(--bd)">打开所在文件夹</div>
+                <div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--sec)">打开</div>
+                <div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--bd);cursor:pointer" style-hover="background:var(--sec)">打开文件夹</div>
               </div>
             </div>
           </div>
@@ -301,8 +317,8 @@
                   <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600">nginx.conf</span><span style="font-size:12px;color:var(--mfg);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">/etc/nginx/nginx.conf</span><span style="font-size:12px;color:var(--mfg)">4.2 KB</span></div>
                 </div>
                 <div style="display:flex;border-top:1px solid var(--bd);font-size:13px;font-weight:600;color:var(--link)">
-                  <div style="height:32px;padding:0 12px;display:flex;align-items:center">打开</div>
-                  <div style="height:32px;padding:0 12px;display:flex;align-items:center;border-left:1px solid var(--bd)">打开所在文件夹</div>
+                  <div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--sec)">打开</div>
+                  <div style="flex:1;min-width:0;height:32px;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--bd);cursor:pointer" style-hover="background:var(--sec)">打开文件夹</div>
                 </div>
               </div>
             </div>
@@ -319,6 +335,7 @@
             </div>
           </div>
         </sc-if>
+        <sc-if value="{{ s.srvProg }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex;gap:8px;align-items:flex-start">
           <div style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--av)"><span style="width:16px;height:16px;display:flex">{{ i.server }}</span></div>
           <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
@@ -333,6 +350,7 @@
             </div>
           </div>
         </div>
+        </sc-if>
         <sc-if value="{{ s.authErr }}">
           <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
             <span style="font-size:12px;color:var(--mfg)">上传 · 10:12</span>
@@ -361,8 +379,8 @@
         <div style="position:absolute;right:4px;top:24px;width:4px;height:120px;background:var(--thumb)"></div>
       </div>
       <div style="flex:none;border-top:1px solid var(--bd);padding:12px 16px;display:flex;gap:12px;align-items:center">
-        <div style="flex:1;min-width:0;height:40px;border:1px dashed var(--ibd);display:flex;align-items:center;gap:8px;padding:0 12px;font-size:13px;color:var(--mfg);white-space:nowrap;overflow:hidden"><span style="width:16px;height:16px;display:flex;flex:none">{{ i.upload }}</span>拖拽文件到此处，上传到 /home/root/deploy</div>
-        <div style="height:40px;padding:0 16px;display:flex;align-items:center;gap:8px;background:var(--pri);color:var(--prifg);font-size:14px;font-weight:600;white-space:nowrap">上传文件</div>
+        <div style="flex:1;min-width:0;height:36px;border:1px dashed var(--ibd);display:flex;align-items:center;gap:8px;padding:0 12px;font-size:13px;color:var(--mfg);white-space:nowrap;overflow:hidden"><span style="width:16px;height:16px;display:flex;flex:none">{{ i.upload }}</span>拖拽文件到此处，上传到 /home/root/deploy</div>
+        <div style="height:36px;padding:0 16px;display:flex;align-items:center;gap:8px;background:var(--pri);color:var(--prifg);font-size:14px;font-weight:600;white-space:nowrap">上传文件</div>
       </div>
       <sc-if value="{{ s.dropSrv }}">
         <div style="position:absolute;inset:0;background:var(--drop);padding:12px;display:flex">
@@ -374,12 +392,49 @@
     </sc-if>
     <sc-if value="{{ s.vSettings }}">
       <div style="height:56px;flex:none;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid var(--bd);font-size:16px;font-weight:600">设置</div>
-      <div style="flex:1;padding:24px;display:flex;flex-direction:column;gap:24px;max-width:640px">
+      <div style="flex:1;min-height:0;overflow:hidden;padding:24px;display:flex;flex-direction:column;gap:24px;max-width:640px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="position:relative;height:28px;margin:0 -8px;padding:0 8px;display:flex;align-items:center;gap:8px;background:{{ ipHeadBg }};cursor:pointer" style-hover="background:var(--sec)">
+            <span style="flex:1;font-size:14px;font-weight:600">本机 IP</span>
+            <span style="width:16px;height:16px;display:flex;color:var(--mfg)">{{ ipChevron }}</span>
+            <sc-if value="{{ s.annot }}">
+              <div style="position:absolute;inset:0;outline:1px dashed #0A84FF;pointer-events:none"></div>
+              <span style="position:absolute;right:0;bottom:calc(100% + 4px);font-size:11px;line-height:14px;font-weight:600;color:#0A84FF;white-space:nowrap">点击区域：整行（含 chevron）· 当前为悬停态，底色 secondary</span>
+            </sc-if>
+          </div>
+          <sc-if value="{{ s.ipOpen }}" hint-placeholder-val="{{ true }}">
+            <div style="background:var(--pop);border:1px solid var(--bd);display:flex;flex-direction:column">
+              <sc-if value="{{ s.ipHas }}" hint-placeholder-val="{{ true }}">
+                <div style="height:32px;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--th);font-size:12px;font-weight:600;color:var(--mfg)"><span style="flex:1;min-width:0">网卡</span><span style="width:144px">IP 地址</span><span style="width:40px;text-align:center">操作</span></div>
+                <sc-for list="{{ ips }}" as="ip" hint-placeholder-count="3">
+                  <div style="height:36px;display:flex;align-items:center;gap:12px;padding:0 16px;border-top:1px solid var(--trow);font-size:14px">
+                    <div style="position:relative;flex:1;min-width:0;display:flex">
+                      <span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ip.nic }}</span>
+                      <sc-if value="{{ ip.tip }}"><div style="position:absolute;left:0;bottom:calc(100% + 4px);z-index:3;padding:4px 8px;background:var(--pop);border:1px solid var(--bd);box-shadow:var(--shadow);font-size:12px;line-height:18px;white-space:nowrap">{{ ip.tip }}</div></sc-if>
+                    </div>
+                    <span style="width:144px;font-family:var(--mono);font-size:13px">{{ ip.addr }}</span>
+                    <div style="width:40px;display:flex;justify-content:center"><div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:{{ ip.btnBg }};color:{{ ip.btnFg }};cursor:pointer" style-hover="background:var(--sec)"><span style="width:16px;height:16px;display:flex">{{ ip.icon }}</span></div></div>
+                  </div>
+                </sc-for>
+                <div style="padding:12px 16px;border-top:1px solid var(--bd);font-size:12px;line-height:18px;color:var(--mfg);text-wrap:pretty">联系人添加你时，填写其中任意一个 IP 即可（端口固定为 47210）</div>
+              </sc-if>
+              <sc-if value="{{ s.ipNone }}">
+                <div style="height:52px;padding:0 16px;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mfg)"><span style="width:16px;height:16px;display:flex">{{ i.wifiOff }}</span>未检测到可用的网络连接</div>
+              </sc-if>
+            </div>
+          </sc-if>
+          <sc-if value="{{ s.ipClosed }}">
+            <div style="background:var(--pop);border:1px solid var(--bd);padding:16px;display:flex;align-items:center;gap:4px;line-height:20px">
+              <span style="font-family:var(--mono);font-size:13px">{{ ipSumIp }}</span>
+              <span style="font-size:13px;color:var(--mfg)">{{ ipSumRest }}</span>
+            </div>
+          </sc-if>
+        </div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <span style="font-size:14px;font-weight:600">数据目录</span>
           <div style="background:var(--pop);border:1px solid var(--bd);padding:16px;display:flex;flex-direction:column;gap:12px">
             <div style="display:flex;align-items:center;gap:8px">
-              <span style="flex:1;min-width:0;font-family:var(--mono);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">C:\Users\zhang\AppData\Roaming\Local Echo</span>
+              <span style="flex:1;min-width:0;font-family:var(--mono);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ dataPath }}</span>
               <div style="height:32px;padding:0 12px;display:flex;align-items:center;background:var(--sec);font-size:14px;font-weight:600">打开</div>
               <div style="height:32px;padding:0 12px;display:flex;align-items:center;background:var(--sec);font-size:14px;font-weight:600">更改…</div>
             </div>
@@ -413,16 +468,21 @@
   </div>
 </div>
 <sc-if value="{{ s.menu }}">
-  <div style="position:absolute;left:150px;top:206px;width:160px;padding:4px;background:var(--pop);border:1px solid var(--bd);box-shadow:var(--shadow)">
+  <div style="position:absolute;left:150px;top:162px;width:160px;padding:4px;background:var(--pop);border:1px solid var(--bd);box-shadow:var(--shadow)">
     <div style="height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;font-size:14px"><span style="width:16px;height:16px;display:flex">{{ i.pencil }}</span>编辑</div>
     <div style="height:32px;display:flex;align-items:center;gap:8px;padding:0 8px;background:var(--sec);font-size:14px;color:var(--dng)"><span style="width:16px;height:16px;display:flex">{{ i.trash }}</span>删除</div>
   </div>
 </sc-if>
 <sc-if value="{{ s.toast }}">
-  <div style="position:absolute;top:48px;right:16px;width:320px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;background:var(--pop);border:1px solid var(--bd);box-shadow:var(--shadow);font-size:14px">
+  <div style="position:absolute;top:48px;right:16px;width:{{ toastW }};padding:12px 16px;display:flex;align-items:flex-start;gap:12px;background:var(--pop);border:1px solid var(--bd);box-shadow:var(--shadow);font-size:14px">
     <span style="width:16px;height:16px;flex:none;display:flex;margin-top:2px;color:{{ toastColor }}">{{ toastIcon }}</span><span style="flex:1;line-height:20px">{{ toastText }}</span>
     <span style="width:14px;height:14px;flex:none;display:flex;margin-top:3px;color:var(--mfg)">{{ i.x }}</span>
   </div>
+</sc-if>
+<sc-if value="{{ s.guide }}">
+  <div style="position:absolute;left:0;right:0;bottom:60px;height:1px;background:#0A84FF;z-index:5"></div>
+  <div style="position:absolute;left:8px;bottom:65px;z-index:5;padding:0 6px;background:#0A84FF;color:#FFFFFF;font-size:11px;line-height:16px;font-weight:600">侧边栏「设置」区 60</div>
+  <div style="position:absolute;right:16px;bottom:65px;z-index:5;padding:0 6px;background:#0A84FF;color:#FFFFFF;font-size:11px;line-height:16px;font-weight:600">{{ guideLabel }}</div>
 </sc-if>
 </sc-if>
 <sc-if value="{{ s.dlg }}">
@@ -468,6 +528,9 @@
         <div style="display:flex;flex-direction:column;gap:8px;opacity:{{ fieldOp }}"><span style="font-size:13px;font-weight:600">名称</span><div style="height:32px;border:1px solid {{ nameBd }};background:var(--bg);padding:0 12px;display:flex;align-items:center;font-size:14px;color:{{ addrFg }}">{{ nameVal }}</div></div>
         <div style="display:flex;flex-direction:column;gap:8px;opacity:{{ fieldOp }}"><span style="font-size:13px;font-weight:600">地址</span><div style="height:32px;border:1px solid {{ addrBd }};background:var(--bg);padding:0 12px;display:flex;align-items:center;font-size:14px;color:{{ addrFg }}">{{ addrVal }}</div></div>
         <div style="display:flex;flex-direction:column;gap:8px;opacity:{{ fieldOp }}"><span style="font-size:13px;font-weight:600">用户名</span><div style="height:32px;border:1px solid var(--ibd);background:var(--bg);padding:0 12px;display:flex;align-items:center;font-size:14px;color:{{ addrFg }}">{{ userVal }}</div></div>
+        <sc-if value="{{ s.editSrv }}">
+          <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:600">远程桌面端口<span style="margin-left:4px;font-weight:400;color:var(--mfg)">选填</span></span><div style="height:32px;border:1px solid {{ portBd }};background:var(--bg);padding:0 12px;display:flex;align-items:center;font-size:14px;color:{{ portFg }}">{{ portVal }}</div><span style="font-size:12px;line-height:18px;color:{{ portHintFg }}">{{ portHint }}</span></div>
+        </sc-if>
         <sc-if value="{{ s.hasPw }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex;flex-direction:column;gap:8px;opacity:{{ fieldOp }}"><span style="font-size:13px;font-weight:600">密码</span><div style="height:32px;border:1px solid var(--ibd);background:var(--bg);padding:0 12px;display:flex;align-items:center;font-size:14px;letter-spacing:2px">{{ pwVal }}</div></div>
         </sc-if>
@@ -551,6 +614,24 @@
       <div style="height:32px;padding:0 12px;display:flex;align-items:center;background:var(--pri);color:var(--prifg);font-size:14px;font-weight:600">{{ dupBtn }}</div>
     </div>
   </sc-if>
+  <sc-if value="{{ s.dRdp }}">
+    <div style="padding:20px 24px 0;display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600">未找到远程桌面客户端</span><span style="width:16px;height:16px;display:flex;color:var(--mfg)">{{ i.x }}</span></div>
+    <div style="padding:12px 24px 16px;display:flex;flex-direction:column;gap:16px">
+      <span style="font-size:14px;line-height:22px;color:var(--mfg);text-wrap:pretty">需要安装一个支持 RDP 的远程桌面客户端，推荐 Remmina。</span>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{ cmds }}" as="c" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:12px;line-height:18px;color:var(--mfg)">{{ c.os }}</span>
+            <div style="height:36px;display:flex;align-items:center;border:1px solid var(--bd);background:var(--bg)">
+              <span style="flex:1;min-width:0;padding:0 12px;font-family:var(--mono);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.cmd }}</span>
+              <div style="width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--bd);background:{{ c.bg }};color:{{ c.fg }};cursor:pointer" style-hover="background:var(--sec)"><span style="width:16px;height:16px;display:flex">{{ c.icon }}</span></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="padding:4px 24px 20px;display:flex;justify-content:flex-end"><div style="height:32px;min-width:72px;padding:0 12px;display:flex;align-items:center;background:var(--pri);color:var(--prifg);font-size:14px;font-weight:600">知道了</div></div>
+  </sc-if>
   <sc-if value="{{ s.dSimple }}">
     <div style="padding:20px 24px 0;display:flex;align-items:flex-start;gap:12px">
       <sc-if value="{{ s.simpleWarn }}"><span style="width:20px;height:20px;flex:none;display:flex;color:var(--dng);margin-top:1px">{{ i.warn }}</span></sc-if>
@@ -578,12 +659,12 @@
 </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000,&quot;height&quot;:680},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;},&quot;scene&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;empty&quot;,&quot;home&quot;,&quot;menu&quot;,&quot;delete&quot;,&quot;contact-updated&quot;,&quot;chat-text&quot;,&quot;chat-images&quot;,&quot;chat-files&quot;,&quot;chat-typing&quot;,&quot;chat-mismatch&quot;,&quot;chat-drop&quot;,&quot;server&quot;,&quot;server-drop&quot;,&quot;server-error&quot;,&quot;dup-peer&quot;,&quot;dup-server&quot;,&quot;settings&quot;,&quot;settings-blocked&quot;,&quot;add-peer&quot;,&quot;add-peer-loading&quot;,&quot;add-peer-error&quot;,&quot;edit-peer&quot;,&quot;add-server&quot;,&quot;add-server-progress&quot;,&quot;add-server-fail-conn&quot;,&quot;add-server-fail-pw&quot;,&quot;add-server-fail-key&quot;,&quot;edit-server&quot;,&quot;reauth&quot;,&quot;reauth-progress&quot;,&quot;browser-dir&quot;,&quot;browser-files&quot;,&quot;browser-loading&quot;,&quot;browser-empty&quot;,&quot;browser-error&quot;,&quot;migrate-existing&quot;,&quot;migrate-move&quot;,&quot;migrate-progress&quot;,&quot;startup&quot;],&quot;default&quot;:&quot;home&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000,&quot;height&quot;:680},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;},&quot;scene&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;empty&quot;,&quot;home&quot;,&quot;menu&quot;,&quot;delete&quot;,&quot;contact-updated&quot;,&quot;chat-text&quot;,&quot;chat-images&quot;,&quot;chat-files&quot;,&quot;chat-files-done&quot;,&quot;chat-typing&quot;,&quot;chat-mismatch&quot;,&quot;chat-drop&quot;,&quot;server&quot;,&quot;server-done&quot;,&quot;server-rdp-hover&quot;,&quot;server-checking&quot;,&quot;server-narrow&quot;,&quot;server-narrow-checking&quot;,&quot;server-rdp-port&quot;,&quot;server-rdp-launch&quot;,&quot;server-drop&quot;,&quot;server-error&quot;,&quot;dup-peer&quot;,&quot;dup-server&quot;,&quot;settings&quot;,&quot;settings-ip-collapsed&quot;,&quot;settings-ip-single&quot;,&quot;settings-ip-single-collapsed&quot;,&quot;settings-ip-none&quot;,&quot;settings-ip-copied&quot;,&quot;settings-ip-narrow&quot;,&quot;settings-blocked&quot;,&quot;add-peer&quot;,&quot;add-peer-loading&quot;,&quot;add-peer-error&quot;,&quot;edit-peer&quot;,&quot;add-server&quot;,&quot;add-server-progress&quot;,&quot;add-server-fail-conn&quot;,&quot;add-server-fail-pw&quot;,&quot;add-server-fail-key&quot;,&quot;edit-server&quot;,&quot;edit-server-port-error&quot;,&quot;reauth&quot;,&quot;reauth-progress&quot;,&quot;rdp-missing&quot;,&quot;browser-dir&quot;,&quot;browser-files&quot;,&quot;browser-loading&quot;,&quot;browser-empty&quot;,&quot;browser-error&quot;,&quot;migrate-existing&quot;,&quot;migrate-move&quot;,&quot;migrate-progress&quot;,&quot;startup&quot;],&quot;default&quot;:&quot;home&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;guide&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
 const LE_T = {
   light: { bg:'#F3F2F2', fg:'#201E1D', mfg:'#605D5D', bd:'#D7D3D3', ibd:'#BAB6B6', sb:'#EAE9E9', sbh:'#DCD9D9', la:'#FFE0D9', pri:'#DD2B0F', prifg:'#FFFFFF', sec:'#E6E4E4', mut:'#EAE9E9', pop:'#FBFAFA', dng:'#AE1800', ok:'#2E7D4F', warn:'#9A5B00', warnl:'#FBEBC8', tb:'#EAE9E9', ovl:'#201E1D80', drop:'#F3F2F2E6', link:'#AE1800', th:'#EAE9E9', tact:'#FFE0D9', trow:'#E3E0E0', tbg:'#FBFAFA', redl:'#FFE0D9', winbd:'#BAB6B6', thumb:'#201E1D40', track:'#DD2B0F26', ring:'#DD2B0F', av:'#DCD9D9', shadow:'0 3px 10px #2D2B2B29', shadowLg:'0 12px 32px #2D2B2B38' },
   dark:  { bg:'#1C1A1A', fg:'#F3F2F2', mfg:'#A8A4A4', bd:'#383535', ibd:'#4A4646', sb:'#232121', sbh:'#2E2B2B', la:'#3D211C', pri:'#DD2B0F', prifg:'#FFFFFF', sec:'#2E2B2B', mut:'#262424', pop:'#262424', dng:'#FF6B52', ok:'#5CB57F', warn:'#E0A43A', warnl:'#3A2E17', tb:'#232121', ovl:'#0A0909B3', drop:'#1C1A1AE6', link:'#FF8A75', th:'#2E2B2B', tact:'#3D211C', trow:'#343131', tbg:'#262424', redl:'#3D211C', winbd:'#444141', thumb:'#F3F2F240', track:'#EC301333', ring:'#EC3013', av:'#383535', shadow:'0 4px 16px #00000066', shadowLg:'0 16px 40px #00000099' }
 };
-const LE_ICONS = { server:'Server', plus:'Plus', settings:'Settings', copy:'Copy', check:'Check', x:'X', minus:'Minus', square:'Square', clip:'Paperclip', send:['SendHorizontal','SendHorizonal'], download:'Download', upload:'Upload', terminal:['SquareTerminal','TerminalSquare'], folder:'Folder', folderOpen:'FolderOpen', file:'File', fileText:'FileText', fileArchive:'FileArchive', fileImage:'FileImage', fileCode:'FileCode', loader:['LoaderCircle','Loader2'], alert:['CircleAlert','AlertCircle'], ok:['CircleCheck','CheckCircle'], err:['CircleX','XCircle'], warn:['TriangleAlert','AlertTriangle'], arrowDown:'ArrowDown', up:'CornerLeftUp', key:'KeyRound', shield:'ShieldCheck', lock:'Lock', trash:'Trash2', image:'Image', retry:'RotateCw', circle:'Circle', userPlus:'UserPlus', pres:'Presentation', pencil:['Pencil'], logOut:'LogOut', info:'Info' };
+const LE_ICONS = { server:'Server', plus:'Plus', settings:'Settings', copy:'Copy', check:'Check', x:'X', minus:'Minus', square:'Square', clip:'Paperclip', send:['SendHorizontal','SendHorizonal'], download:'Download', upload:'Upload', terminal:['SquareTerminal','TerminalSquare'], folder:'Folder', folderOpen:'FolderOpen', file:'File', fileText:'FileText', fileArchive:'FileArchive', fileImage:'FileImage', fileCode:'FileCode', loader:['LoaderCircle','Loader2'], alert:['CircleAlert','AlertCircle'], ok:['CircleCheck','CheckCircle'], err:['CircleX','XCircle'], warn:['TriangleAlert','AlertTriangle'], arrowDown:'ArrowDown', up:'CornerLeftUp', key:'KeyRound', shield:'ShieldCheck', lock:'Lock', trash:'Trash2', image:'Image', retry:'RotateCw', circle:'Circle', userPlus:'UserPlus', pres:'Presentation', pencil:['Pencil'], logOut:'LogOut', info:'Info', monitor:'Monitor', chevronDown:'ChevronDown', chevronRight:'ChevronRight', wifiOff:'WifiOff' };
 
 class Component extends DCLogic {
   componentDidMount() { this.wait(); }
@@ -616,11 +697,14 @@ class Component extends DCLogic {
   renderVals() {
     const theme = this.props.theme === 'dark' ? 'dark' : 'light';
     const scene = this.props.scene || 'home';
+    const narrow = scene.includes('narrow');
+    const W = narrow ? 760 : 1000, H = narrow ? 520 : 680;
+    const compact = (W - 2 - 261) < 720;
     const t = LE_T[theme]; const i = this.icons();
     const vars = {}; for (const k in t) vars['--' + k] = t[k];
     vars['--mono'] = '"Cascadia Mono", Consolas, "DejaVu Sans Mono", "Noto Sans Mono", monospace';
     const font = '"Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", system-ui, sans-serif';
-    const dialogs = ['add-peer','add-peer-loading','add-peer-error','edit-peer','edit-server','add-server-fail-conn','reauth-progress','dup-peer','dup-server','add-server','add-server-progress','add-server-fail-pw','add-server-fail-key','reauth','browser-dir','browser-files','browser-loading','browser-empty','browser-error','migrate-existing','migrate-move','migrate-progress','startup','delete-only'];
+    const dialogs = ['add-peer','add-peer-loading','add-peer-error','edit-peer','edit-server','add-server-fail-conn','reauth-progress','dup-peer','dup-server','add-server','add-server-progress','add-server-fail-pw','add-server-fail-key','reauth','browser-dir','browser-files','browser-loading','browser-empty','browser-error','migrate-existing','migrate-move','migrate-progress','startup','delete-only','edit-server-port-error','rdp-missing'];
     const standalone = dialogs.includes(scene);
     const win = !standalone;
     const v = (n) => scene.startsWith(n);
@@ -636,29 +720,32 @@ class Component extends DCLogic {
     const dlgKind = scene === 'delete' ? 'delete-only' : scene;
     const isDlg = standalone || scene === 'delete';
     const dAddPeer = dlgKind.startsWith('add-peer');
-    const dAddSrv = dlgKind.startsWith('add-server') || dlgKind.startsWith('reauth') || dlgKind === 'edit-server';
+    const dAddSrv = dlgKind.startsWith('add-server') || dlgKind.startsWith('reauth') || dlgKind.startsWith('edit-server');
     const dBrowser = dlgKind.startsWith('browser');
     const dSimple = ['delete-only','migrate-existing','migrate-move','migrate-progress','startup'].includes(dlgKind);
-    const toastKey = { home: 'copied', 'chat-files': 'saved', 'server-error': 'noterm', 'contact-updated': 'updated' }[scene];
+    const toastKey = { 'chat-files': 'saved', 'server-error': 'noterm', 'contact-updated': 'updated', 'settings-ip-copied': 'ipcopied', 'server-rdp-port': 'rdpport', 'server-rdp-launch': 'rdplaunch' }[scene];
     const s = {
-      win, dlg: isDlg, singleIp: scene !== 'home', multiIp: scene === 'home', sbEmpty, sbFull: !sbEmpty,
+      win, dlg: isDlg, sbEmpty, sbFull: !sbEmpty,
       vHome, vChat, vServer, vSettings, chatA, chatB: scene === 'chat-images' || scene === 'chat-drop', chatC: scene === 'chat-files',
       newMsg: scene === 'chat-files', typing: scene === 'chat-typing', notTyping: scene !== 'chat-typing', chatAFail: chatA && scene !== 'chat-mismatch', mismatch: scene === 'chat-mismatch',
-      dropPeer: scene === 'chat-drop', dropSrv: scene === 'server-drop', srvOk: scene !== 'server-error', authErr: scene === 'server-error',
+      dropPeer: scene === 'chat-drop', dropSrv: scene === 'server-drop', srvOk: !['server-error','server-done'].includes(scene), srvDone: scene === 'server-done', srvProg: scene !== 'server-done', authErr: scene === 'server-error', banner: ['server-error','server-checking','server-narrow-checking'].includes(scene),
+      hWide: !compact, hCompact: compact, rdpBusy: scene.endsWith('checking'), rdpIdle: !scene.endsWith('checking'), rdpTip: ['server-rdp-hover','server-narrow','server-narrow-checking'].includes(scene),
+      chatD: scene === 'chat-files-done', guide: this.props.guide === true || this.props.guide === 'true',
+      ipOpen: !scene.endsWith('collapsed'), ipClosed: scene.endsWith('collapsed'), ipNone: scene === 'settings-ip-none', ipHas: scene !== 'settings-ip-none', annot: scene === 'settings-ip-collapsed', dRdp: dlgKind === 'rdp-missing',
       setBlocked: scene === 'settings-blocked', menu: scene === 'menu', toast: !!toastKey,
       dAddPeer, apIdle: dlgKind === 'add-peer', apLoading: dlgKind === 'add-peer-loading', apError: dlgKind === 'add-peer-error', apNotLoading: dlgKind !== 'add-peer-loading',
-      dAddSrv, dEditPeer: dlgKind === 'edit-peer', reauth: dlgKind.startsWith('reauth'), reauthIdle: dlgKind === 'reauth', srvForm: dAddSrv && !dlgKind.startsWith('reauth'), hasPw: dlgKind.startsWith('add-server'), editSrv: dlgKind === 'edit-server', asNotice: dlgKind === 'add-server' || dlgKind === 'reauth', asSteps: ['add-server-progress','add-server-fail-pw','add-server-fail-key','add-server-fail-conn','reauth-progress'].includes(dlgKind), asProg: dlgKind === 'add-server-progress' || dlgKind === 'reauth-progress', dDup: dlgKind.startsWith('dup-'), dupScroll: dlgKind === 'dup-server',
+      dAddSrv, dEditPeer: dlgKind === 'edit-peer', reauth: dlgKind.startsWith('reauth'), reauthIdle: dlgKind === 'reauth', srvForm: dAddSrv && !dlgKind.startsWith('reauth'), hasPw: dlgKind.startsWith('add-server'), editSrv: dlgKind.startsWith('edit-server'), asNotice: dlgKind === 'add-server' || dlgKind === 'reauth', asSteps: ['add-server-progress','add-server-fail-pw','add-server-fail-key','add-server-fail-conn','reauth-progress'].includes(dlgKind), asProg: dlgKind === 'add-server-progress' || dlgKind === 'reauth-progress', dDup: dlgKind.startsWith('dup-'), dupScroll: dlgKind === 'dup-server',
       dBrowser, bList: ['browser-dir','browser-files'].includes(dlgKind), bLoading: dlgKind === 'browser-loading', bEmpty: dlgKind === 'browser-empty', bError: dlgKind === 'browser-error',
       dSimple, simpleWarn: dlgKind === 'startup', migProg: dlgKind === 'migrate-progress'
     };
-    const toast = { copied: ['已复制 192.168.1.10', 'var(--ok)', i.ok], saved: ['文件已保存', 'var(--ok)', i.ok], noterm: ['未找到可用的终端程序', 'var(--dng)', i.err], updated: ['该联系人已在列表中，已更新 IP 和昵称', 'var(--ok)', i.ok] }[toastKey] || ['', '', null];
+    const toast = { copied: ['已复制 192.168.1.10', 'var(--ok)', i.ok], saved: ['文件已保存', 'var(--ok)', i.ok], noterm: ['未找到可用的终端程序', 'var(--dng)', i.err], updated: ['该联系人已在列表中，已更新 IP 和昵称', 'var(--ok)', i.ok], ipcopied: ['已复制 192.168.1.58', 'var(--ok)', i.ok], rdpport: ['无法连接 10.0.0.5:3389：服务器未开启远程桌面，或端口不可达。可在「编辑服务器」中修改远程桌面端口', 'var(--dng)', i.err], rdplaunch: ['无法启动远程桌面客户端：拒绝访问。（os error 5）', 'var(--dng)', i.err] }[toastKey] || ['', '', null];
     const D = { 'add-peer': 400, 'add-server': 440, browser: 640, simple: 420 };
-    const dw = (dAddPeer || s.dEditPeer) ? 400 : dAddSrv ? 440 : dBrowser ? 640 : s.dDup ? 480 : 420;
+    const dw = (dAddPeer || s.dEditPeer) ? 400 : dAddSrv ? 440 : dBrowser ? 640 : (s.dDup || s.dRdp) ? 480 : 420;
     const dlgBox = { width: dw, display: 'flex', flexDirection: 'column', background: 'var(--pop)', border: '1px solid var(--bd)', boxShadow: 'var(--shadowLg)', color: 'var(--fg)' };
     if (dBrowser) dlgBox.height = 480;
     const layerStyle = win ? { position: 'absolute', left: 0, right: 0, top: 36, bottom: 0, background: 'var(--ovl)', display: 'flex', alignItems: 'center', justifyContent: 'center' } : { display: 'flex' };
     const rootStyle = Object.assign(vars, win
-      ? { width: 1000, height: 680, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'var(--bg)', color: 'var(--fg)', border: '1px solid var(--winbd)', fontFamily: font, lineHeight: 1.45, boxSizing: 'border-box' }
+      ? { width: W, height: H, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'var(--bg)', color: 'var(--fg)', border: '1px solid var(--winbd)', fontFamily: font, lineHeight: 1.45, boxSizing: 'border-box' }
       : { display: 'inline-flex', color: 'var(--fg)', fontFamily: font, lineHeight: 1.45 });
     // add-server step states
     const L = ['连接服务器','验证密码','部署访问密钥','验证密钥登录'];
@@ -683,14 +770,30 @@ class Component extends DCLogic {
       : [['release-2.3.1.tar.gz', i.fileArchive], ['nginx.conf', i.fileCode], ['dist.zip', i.fileArchive], ['app.tar.gz', i.fileArchive], ['docker-compose.yml', i.fileText]];
     const dupRows = DR.map(([name, icon]) => ({ name, icon, meta: '— ' + (dupPeer ? '上次发送于' : '上次上传于') + ' 2026-11-08 14:32' }));
     const sd = Object.assign({ path: '', body: '', ok: '', cancel: false, okBg: 'var(--pri)', okFg: 'var(--prifg)' }, SD);
+    const portErr = dlgKind === 'edit-server-port-error';
+    const NIC_WIN = [['以太网','192.168.1.10'],['WLAN','10.8.0.3'],['vEthernet (WSL (Hyper-V firewall))','172.29.48.1']];
+    const NIC_LNX = [['enp0s31f6','192.168.1.10'],['wlp0s20f3','192.168.1.58'],['docker0','172.17.0.1'],['br-5c1e8f2a9d3b','172.18.0.1']];
+    const ipLinux = scene === 'settings-ip-copied';
+    const ipList = scene === 'settings-ip-none' ? [] : scene.startsWith('settings-ip-single') ? NIC_WIN.slice(0, 1) : ipLinux ? NIC_LNX : NIC_WIN;
+    const ips = ipList.map(([nic, addr], n) => {
+      const copied = ipLinux && n === 1; const mid = narrow && nic.length > 24;
+      return { nic: mid ? nic.slice(0, 14) + '…' + nic.slice(-10) : nic, addr, tip: mid ? nic : '', icon: copied ? i.check : i.copy, btnFg: copied ? 'var(--ok)' : 'var(--mfg)', btnBg: copied ? 'var(--sec)' : 'transparent' };
+    });
+    const cmds = [['Ubuntu / Debian','sudo apt install remmina remmina-plugin-rdp'],['Fedora','sudo dnf install remmina remmina-plugins-rdp'],['Flatpak','flatpak install flathub org.remmina.Remmina']].map(([os, cmd]) => ({ os, cmd, icon: i.copy, fg: 'var(--mfg)', bg: 'transparent' }));
     return {
+      ips, cmds, ipChevron: s.ipOpen ? i.chevronDown : i.chevronRight, ipHeadBg: s.annot ? 'var(--sec)' : 'transparent',
+      ipSumIp: ipList.length ? ipList[0][1] : '', ipSumRest: ipList.length > 1 ? '等 ' + ipList.length + ' 个' : '',
+      dataPath: ipLinux ? '/home/zhang/.local/share/local-echo' : 'C:\\Users\\zhang\\AppData\\Roaming\\Local Echo',
+      rdpBg: (s.rdpTip && !s.rdpBusy) ? 'var(--av)' : 'var(--sec)', rdpOp: s.rdpBusy ? 0.7 : 1, tipText: s.rdpBusy ? '正在连接…' : '用远程桌面连接 10.0.0.5:3389',
+      toastW: toastKey === 'rdpport' ? '400px' : '320px', guideLabel: s.vServer ? '服务器底栏 60 · 上边框同在 y = 618' : '输入区 60（单行）· 上边框同在 y = 618',
+      portVal: portErr ? '70000' : '3389', portFg: portErr ? 'var(--fg)' : 'var(--mfg)', portBd: portErr ? 'var(--dng)' : 'var(--ibd)', portHint: portErr ? '请输入 1–65535 之间的端口' : '用于“在远程桌面打开”，默认 3389', portHintFg: portErr ? 'var(--dng)' : 'var(--mfg)',
       rootStyle, s, ib, i, mark16: this.mark(16), mark24: this.mark(24),
       chatPadB: s.newMsg ? '64px' : '16px',
       dupRows, dupTitle: dupPeer ? '已发送过同名文件' : '已上传过同名文件', dupBody: dupPeer ? '继续发送后，对方会再收到一份。' : '继续上传将覆盖服务器上 /home/root/deploy 中的同名文件。', dupBtn: dupPeer ? '继续发送' : '继续上传',
       toastText: toast[0], toastColor: toast[1], toastIcon: toast[2],
       layerStyle, dlgBox,
       srvTitle: s.reauth ? '重新授权' : s.editSrv ? '编辑服务器' : '添加服务器', srvBtn: s.reauth ? '重新授权' : s.editSrv ? '保存' : '连接并添加',
-      nameVal: filled ? '生产服务器' : '如：测试服务器', nameBd: filled ? 'var(--ibd)' : 'var(--ring)', addrVal: s.editSrv ? '10.0.0.6' : filled ? '10.0.0.5' : '192.168.1.20 或 192.168.1.20:2222', addrFg: filled ? 'var(--fg)' : 'var(--mfg)', addrBd: s.editSrv ? 'var(--ring)' : 'var(--ibd)',
+      nameVal: filled ? '生产服务器' : '如：测试服务器', nameBd: filled ? 'var(--ibd)' : 'var(--ring)', addrVal: s.editSrv ? '10.0.0.6' : filled ? '10.0.0.5' : '192.168.1.20 或 192.168.1.20:2222', addrFg: filled ? 'var(--fg)' : 'var(--mfg)', addrBd: (s.editSrv && !portErr) ? 'var(--ring)' : 'var(--ibd)',
       userVal: filled ? 'root' : '', pwVal: filled ? '••••••••••' : '', fieldOp: s.asProg ? 0.6 : 1, subOp: s.asProg ? 0.7 : 1, steps,
       brTitle: dlgKind === 'browser-files' ? '下载文件' : '选择远程目录', brPath: dlgKind === 'browser-empty' ? '/home/root/deploy/tmp' : dlgKind === 'browser-error' ? '/root/.ssh' : '/home/root/deploy',
       rows, brCount: files ? '已选 3 项' : '', brBtn: files ? '下载所选' : '选择此目录', brOp: (s.bLoading || s.bError) ? 0.45 : 1,

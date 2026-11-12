@@ -34,6 +34,8 @@ pub struct AppState {
     pub errors: HashMap<String, String>,
     pub auth_failed: HashSet<i64>,
     pub selected: Option<i64>,
+    /// 设置页「本机 IP」是否收起：默认展开，只在本次运行期间记住，不写盘（v0.2 U2）。
+    pub ips_collapsed: bool,
     window: Option<AnyWindowHandle>,
     view: Option<WeakEntity<AppView>>,
     tray: Option<Tray>,
@@ -75,6 +77,7 @@ pub fn init(core: Arc<Core>, tray: Option<Tray>, mut rx: UnboundedReceiver<Event
         errors: HashMap::new(),
         auth_failed: HashSet::new(),
         selected: None,
+        ips_collapsed: false,
         window: None,
         view: None,
         tray,

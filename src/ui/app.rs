@@ -1,7 +1,5 @@
 //! 主窗口：标题栏 + 侧边栏 + 会话区（设计 01 / 02，docs/ui「LE Window」）。
 
-use std::time::Duration;
-
 use gpui_kit::{
     assets::IconName as Ic,
     component::{
@@ -30,10 +28,6 @@ enum Page {
 
 pub struct AppView {
     contacts: Vec<Contact>,
-    /// (网卡名, IP)
-    ips: Vec<(String, String)>,
-    /// 刚复制的 IP，2 秒内显示对勾。
-    copied: Option<String>,
     page: Page,
     _appearance: Subscription,
 }
@@ -45,16 +39,8 @@ impl AppView {
         let appearance = cx.observe_window_appearance(window, |_, window, cx| {
             Theme::sync_system_appearance(Some(window), cx);
         });
-        let ips = local_ip_address::list_afinet_netifas()
-            .unwrap_or_default()
-            .into_iter()
-            .filter(|(_, ip)| ip.is_ipv4() && !ip.is_loopback())
-            .map(|(name, ip)| (name, ip.to_string()))
-            .collect();
         let mut this = Self {
             contacts: Vec::new(),
-            ips,
-            copied: None,
             page: Page::Empty,
             _appearance: appearance,
         };
@@ -117,21 +103,6 @@ impl AppView {
         }
     }
 
-    fn copy_ip(&mut self, ip: String, window: &mut Window, cx: &mut Context<Self>) {
-        cx.write_to_clipboard(ClipboardItem::new_string(ip.clone()));
-        window.push_notification(Notification::success(format!("已复制 {ip}")), cx);
-        self.copied = Some(ip);
-        cx.notify();
-        cx.spawn(async move |this, cx| {
-            cx.background_executor().timer(Duration::from_secs(2)).await;
-            let _ = this.update(cx, |this, cx| {
-                this.copied = None;
-                cx.notify();
-            });
-        })
-        .detach();
-    }
-
     fn delete_contact(&mut self, contact: Contact, window: &mut Window, cx: &mut Context<Self>) {
         let view = cx.entity().downgrade();
         let confirm = kit::Confirm {
@@ -167,97 +138,6 @@ impl AppView {
     }
 
     // ------------------------------------------------------------ 侧边栏
-
-    fn render_ips(&self, cx: &mut Context<Self>) -> AnyElement {
-        let theme = cx.theme().clone();
-        if self.ips.len() <= 1 {
-            let ip = self.ips.first().map(|(_, ip)| ip.clone());
-            let copied = ip.is_some() && self.copied == ip;
-            return h_flex()
-                .id("my-ip")
-                .px_4()
-                .py_3()
-                .gap_2()
-                .border_b_1()
-                .border_color(theme.sidebar_border)
-                .text_size(px(13.))
-                .when(ip.is_some(), |this| {
-                    this.cursor_pointer().hover(|s| s.bg(theme.sidebar_accent))
-                })
-                .child(div().text_color(theme.muted_foreground).child("本机 IP："))
-                .child(
-                    div()
-                        .flex_1()
-                        .font_semibold()
-                        .child(ip.clone().unwrap_or_else(|| "未连接网络".into())),
-                )
-                .when_some(ip, |this, ip| {
-                    this.child(
-                        div()
-                            .text_color(if copied {
-                                theme.success
-                            } else {
-                                theme.muted_foreground
-                            })
-                            .child(kit::icon(if copied { Ic::Check } else { Ic::Copy }, 14.)),
-                    )
-                    .on_click(
-                        cx.listener(move |this, _, window, cx| {
-                            this.copy_ip(ip.clone(), window, cx)
-                        }),
-                    )
-                })
-                .into_any_element();
-        }
-        v_flex()
-            .p_2()
-            .gap(px(2.))
-            .border_b_1()
-            .border_color(theme.sidebar_border)
-            .text_size(px(13.))
-            .child(
-                div()
-                    .px_2()
-                    .py(px(2.))
-                    .text_size(px(12.))
-                    .text_color(theme.muted_foreground)
-                    .child("本机 IP（点击复制）"),
-            )
-            .children(self.ips.iter().map(|(name, ip)| {
-                let copied = self.copied.as_deref() == Some(ip);
-                let ip = ip.clone();
-                h_flex()
-                    .id(SharedString::from(format!("ip-{ip}")))
-                    .px_2()
-                    .py(px(6.))
-                    .gap_2()
-                    .cursor_pointer()
-                    .when(copied, |this| this.bg(theme.sidebar_accent))
-                    .hover(|s| s.bg(theme.sidebar_accent))
-                    .child(div().flex_1().font_semibold().child(ip.clone()))
-                    .child(
-                        div()
-                            .text_size(px(12.))
-                            .text_color(theme.muted_foreground)
-                            .child(name.clone()),
-                    )
-                    .child(
-                        div()
-                            .text_color(if copied {
-                                theme.success
-                            } else {
-                                theme.muted_foreground
-                            })
-                            .child(kit::icon(if copied { Ic::Check } else { Ic::Copy }, 14.)),
-                    )
-                    .on_click(
-                        cx.listener(move |this, _, window, cx| {
-                            this.copy_ip(ip.clone(), window, cx)
-                        }),
-                    )
-            }))
-            .into_any_element()
-    }
 
     fn group_header(
         &self,
@@ -426,7 +306,7 @@ impl AppView {
             .text_color(theme.sidebar_foreground)
             .border_r_1()
             .border_color(theme.sidebar_border)
-            .child(self.render_ips(cx))
+            // v0.2 U2：本机 IP 移到设置页，侧边栏直接从「联系人」分组开始。
             .child(
                 v_flex()
                     .id("sidebar-list")
@@ -449,7 +329,15 @@ impl AppView {
                     .children(host_rows),
             )
             .child(
-                div().p_2().border_t_1().border_color(theme.sidebar_border).child(
+                // 底栏高度 60（v0.2 U3）：「设置」行 36 垂直居中，与右侧输入区 / 服务器底栏的上边框对齐。
+                v_flex()
+                    .h(kit::footer_height())
+                    .flex_none()
+                    .px(px(8.))
+                    .justify_center()
+                    .border_t_1()
+                    .border_color(theme.sidebar_border)
+                    .child(
                     h_flex()
                         .id("settings")
                         .h(px(36.))
